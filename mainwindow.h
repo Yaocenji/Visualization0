@@ -3,12 +3,15 @@
 
 #include <QMainWindow>
 
-class MainWindow : public QMainWindow
-{
+#include "myrequester.h"
+
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+public:
 };
 #endif // MAINWINDOW_H
