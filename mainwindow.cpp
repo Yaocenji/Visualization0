@@ -5,7 +5,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     QObject::connect(m, SIGNAL(finish(QJsonObject *, QNetworkReply *)), this,
                      SLOT(finishRequest()));
-    m->sendRequest("vn", {}, {"title"}, "rating", true, 10, 1);
+    m->sendRequest("vn", {{"tag", "=", "g23"}, {"tag", "=", "g45"}},
+                   {"title", "languages", "platforms", "length_minutes",
+                    "length_votes", "rating", "votecount"},
+                   "rating", true, 5, 1);
 }
 
 MainWindow::~MainWindow() {

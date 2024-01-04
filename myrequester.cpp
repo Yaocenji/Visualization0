@@ -4,6 +4,9 @@ myrequester::myrequester(QObject *parent) : QObject{parent} {
     naManager = new QNetworkAccessManager;
     request.setHeader(QNetworkRequest::ContentTypeHeader,
                       QVariant("application/json"));
+    // 连接信号与槽函数
+    QObject::connect(naManager, SIGNAL(finished(QNetworkReply *)), this,
+                     SLOT(finishRequest(QNetworkReply *)));
 }
 
 void myrequester::sendRequest(QString suffix, QVector<QVector<QString>> filters,
@@ -18,14 +21,20 @@ void myrequester::sendRequest(QString suffix, QVector<QVector<QString>> filters,
     // filter信息
     QJsonArray filterArray;
     // 是否有多个过滤器
-    if (filters.size() >= 2) filterArray.push_back("and");
-    // 遍历
-    for (auto &i : filters) {
-        QJsonArray thisFilter;
-        for (auto &j : i) {
-            thisFilter.push_back(j);
+    if (filters.size() >= 2) {
+        filterArray.push_back("and");
+        // 遍历
+        for (auto &i : filters) {
+            QJsonArray thisFilter;
+            for (auto &j : i) {
+                thisFilter.push_back(j);
+            }
+            filterArray.push_back(thisFilter);
         }
-        filterArray.push_back(thisFilter);
+    } else if (filters.size() == 1) {
+        for (auto &j : filters[0]) {
+            filterArray.push_back(j);
+        }
     }
     // 将filter数组插入
     argumentsJson.insert("filters", filterArray);
@@ -61,9 +70,6 @@ void myrequester::sendRequest(QString suffix, QVector<QVector<QString>> filters,
              << "\n"
              << argumentsJson << "\n";
 
-    // 连接信号与槽函数
-    QObject::connect(naManager, SIGNAL(finished(QNetworkReply *)), this,
-                     SLOT(finishRequest(QNetworkReply *)));
     // 发出请求
     naManager->post(request, QJsonDocument(argumentsJson).toJson());
 }
@@ -75,7 +81,7 @@ void myrequester::finishRequest(QNetworkReply *reply) {
     QVariant statusCode =
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.isValid()) {
-        qDebug() << "status code=" << statusCode.toInt();
+        qDebug() << "status code = " << statusCode.toInt();
     }
 
     QNetworkReply::NetworkError err = reply->error();
