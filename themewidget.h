@@ -30,9 +30,10 @@
 #ifndef THEMEWIDGET_H
 #define THEMEWIDGET_H
 
-#include "myjson.h"
-#include <QtWidgets/QWidget>
 #include <QtCharts/QChartGlobal>
+#include <QtWidgets/QWidget>
+
+#include "myjson.h"
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -51,8 +52,7 @@ typedef QList<DataList> DataTable;
 
 QT_CHARTS_USE_NAMESPACE
 
-class ThemeWidget: public QWidget
-{
+class ThemeWidget : public QWidget {
     Q_OBJECT
 public:
     explicit ThemeWidget(QJsonObject jsonObject, QWidget *parent = 0);
@@ -63,7 +63,8 @@ private Q_SLOTS:
 
 private:
     DataTable getData(QJsonObject jsonObject);
-    DataTable generateRandomData(int listCount, int valueMax, int valueCount) const;
+    DataTable generateRandomData(int listCount, int valueMax,
+                                 int valueCount) const;
     void populateThemeBox();
     void populateAnimationBox();
     void populateLegendBox();
@@ -75,13 +76,17 @@ private:
     QChart *createSplineChart() const;
     QChart *createScatterChart(QString tagX, QString tagY) const;
 
+public slots:
+    // 添加json数据
+    void addJsonData(QJsonObject *addData);
+
 private:
     int m_listCount;
     int m_valueMax;
     int m_valueCount;
     QList<QChartView *> m_charts;
     DataTable m_dataTable;
-    QVector<galgame*> m_galgames;
+    QVector<galgame *> m_galgames;
 
     Ui_ThemeWidgetForm *m_ui;
 };

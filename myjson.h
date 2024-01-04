@@ -1,15 +1,16 @@
 #ifndef MYJSON_H
 #define MYJSON_H
 
-#include <QString>
-#include <QVector>
 #include <QDebug>
-#include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
+#include <QVector>
 
-struct galgame
-{
+QVector<QString> JsonToStringArray(QJsonValue jsonValue);
+
+struct galgame {
 public:
     QString id;
     QVector<QString> languages;
@@ -19,24 +20,23 @@ public:
     float rating;
     QString title;
     int votecount;
-    double getDouble(QString tag)
-    {
-        if(tag == "length_minutes") return length_minutes;
-        if(tag == "length_votes") return length_votes;
-        if(tag == "rating") return rating;
-        if(tag == "votecount") return votecount;
+    double getDouble(QString tag) {
+        if (tag == "length_minutes") return length_minutes;
+        if (tag == "length_votes") return length_votes;
+        if (tag == "rating") return rating;
+        if (tag == "votecount") return votecount;
         qDebug() << "getDouble type error";
         return -1;
     }
 };
 
-class myjson
-{
+class myjson {
 public:
     myjson(QJsonObject jsonObject);
-    QVector<galgame*> galgames;
+    QVector<galgame *> galgames;
+
 private:
-    QVector<QString> toStringArray(QJsonValue jsonValue);
+    // QVector<QString> toStringArray(QJsonValue jsonValue);
 };
 
 #endif // MYJSON_H
