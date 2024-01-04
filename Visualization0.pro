@@ -1,6 +1,6 @@
 QT       += core gui
 QT       += network
-QT       += datavisualization
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,11 +15,18 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    myrequester.cpp
+    myjson.cpp \
+    myrequester.cpp \
+    themewidget.cpp
 
 HEADERS += \
     mainwindow.h \
-    myrequester.h
+    myjson.h \
+    myrequester.h \
+    themewidget.h
+
+FORMS += \
+    themewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
