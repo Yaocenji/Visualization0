@@ -81,6 +81,8 @@ void myrequester::finishRequest(QNetworkReply *reply) {
     QNetworkReply::NetworkError err = reply->error();
     if (err != QNetworkReply::NoError) {
         qDebug() << "Failed: " << reply->errorString();
+        // 发出信号
+        emit finish(&emptyJsonObj, reply);
     } else {
         // 获取返回内容
         QJsonDocument doc = QJsonDocument::fromJson(bytes);
@@ -89,5 +91,7 @@ void myrequester::finishRequest(QNetworkReply *reply) {
         qDebug() << "ResultJson: \n" << json << "\n\n";
         loginResultJson = QString::fromStdString(bytes.toStdString());
         // 处理返回数据
+        // 发出信号
+        emit finish(&json, reply);
     }
 }

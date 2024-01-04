@@ -12,6 +12,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-public:
+public slots:
+    void finishRequest();
 };
 #endif // MAINWINDOW_H

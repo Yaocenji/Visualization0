@@ -12,6 +12,10 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
+struct myresult {
+    QJsonObject json;
+};
+
 class myrequester : public QObject {
     Q_OBJECT
 public:
@@ -28,10 +32,12 @@ public slots:
     void finishRequest(QNetworkReply *reply);
 
 signals:
-    void finish(QJsonObject *jsonInfo);
+    void finish(QJsonObject *jsonInfo, QNetworkReply *rawReply);
 
 public:
     QString urlbase0 = {"https://api.vndb.org/kana/"};
+
+    QJsonObject emptyJsonObj;
 
     QNetworkRequest request;
     QNetworkAccessManager *naManager;

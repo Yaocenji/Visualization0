@@ -1,7 +1,10 @@
 QT       += core gui
 QT       += network
+QT       += datavisualization
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+requires(qtConfig(tablewidget))
 
 CONFIG += c++17
 
