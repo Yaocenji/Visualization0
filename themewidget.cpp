@@ -73,7 +73,8 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
 
     // create charts
 
-    QChartView *chartView;
+    scatterChart = new QChart();
+    scatterSeries = new QScatterSeries();
 
     //    chartView = new QChartView(createAreaChart());
     //    m_ui->gridLayout->addWidget(chartView, 1, 0);
@@ -255,6 +256,7 @@ QChart *ThemeWidget::createLineChart(QString tagX, QString tagY) const {
         series->setName(gal->title);
         series->setUseOpenGL(true);
     }
+
     chart->addSeries(series);
 
     chart->createDefaultAxes();
@@ -317,30 +319,43 @@ QChart *ThemeWidget::createSplineChart() const {
 
 QChart *ThemeWidget::createScatterChart(QString tagX, QString tagY) const {
     // scatter chart
-    QChart *chart = new QChart();
-    chart->setTitle("Scatter chart");
+    scatterChart->setTitle("Scatter chart");
 
     double maxX = -1;
     double maxY = -1;
-    QScatterSeries *series = new QScatterSeries();
+
     for (int i = 0; i < m_galgames.count(); i++) {
         galgame *gal = m_galgames[i];
         if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
         if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        series->append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+        scatterSeries->append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
     }
-    chart->legend()->hide();
-    chart->addSeries(series);
+    scatterChart->legend()->hide();
+    scatterChart->addSeries(scatterSeries);
 
-    chart->createDefaultAxes();
-    chart->axes(Qt::Horizontal).first()->setRange(0, maxX);
-    //    chart->axes(Qt::Vertical).first()->setRange(0, maxY);
+    scatterChart->createDefaultAxes();
+    scatterChart->axes(Qt::Horizontal).first()->setRange(0, 150);
+        scatterChart->axes(Qt::Vertical).first()->setRange(0, 100);
+
     // Add space to label to add space between labels and axis
     QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+        qobject_cast<QValueAxis *>(scatterChart->axes(Qt::Vertical).first());
     Q_ASSERT(axisY);
     axisY->setLabelFormat("%.1f  ");
-    return chart;
+    return scatterChart;
+}
+
+void ThemeWidget::updateScatterChart(QString tagX, QString tagY) const {
+    scatterSeries->clear();
+    QList<QPointF> replaceData;
+    for (int i = 0; i < m_galgames.count(); i++) {
+        galgame *gal = m_galgames[i];
+        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+    }
+    qDebug() << replaceData;
+    scatterSeries->replace(replaceData);
+    scatterChart->update();
+    chartView->update();
 }
 
 void ThemeWidget::updateUI() {
@@ -442,5 +457,5 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
         gal->votecount = galData["votecount"].toInt();
         m_galgames.append(gal);
     }
-    this->update();
+    updateScatterChart("length_votes", "rating");
 }

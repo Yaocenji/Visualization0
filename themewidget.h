@@ -35,6 +35,33 @@
 
 #include "myjson.h"
 
+#include <QtCharts/QAbstractBarSeries>
+#include <QtCharts/QAreaSeries>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QChartView>
+#include <QtCharts/QLegend>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QPercentBarSeries>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QPieSlice>
+#include <QtCharts/QScatterSeries>
+#include <QtCharts/QSplineSeries>
+#include <QtCharts/QStackedBarSeries>
+#include <QtCharts/QValueAxis>
+#include <QtCore/QRandomGenerator>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
+
+#include "ui_themewidget.h"
+
 QT_BEGIN_NAMESPACE
 class QComboBox;
 class QCheckBox;
@@ -56,6 +83,7 @@ class ThemeWidget : public QWidget {
     Q_OBJECT
 public:
     explicit ThemeWidget(QJsonObject jsonObject, QWidget *parent = 0);
+    void updateScatterChart(QString tagX, QString tagY) const;
     ~ThemeWidget();
 
 private Q_SLOTS:
@@ -88,6 +116,9 @@ private:
     DataTable m_dataTable;
     QVector<galgame *> m_galgames;
 
+    QChartView *chartView;
+    QScatterSeries* scatterSeries;
+    QChart *scatterChart;
     Ui_ThemeWidgetForm *m_ui;
 };
 

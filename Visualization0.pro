@@ -1,6 +1,7 @@
 QT       += core gui
 QT       += network
 QT       += charts
+INCLUDEPATH += E:\Qt\5.15.2\mingw81_64\bin\OpenSSL-Win64\include
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
