@@ -13,7 +13,7 @@ struct ReqArguments {
 
 const QVector<QString> vn_fields = {
     "title",        "languages", "platforms", "length_minutes",
-    "length_votes", "rating",    "votecount"};
+    "length_votes", "rating",    "votecount", "released"};
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     widget = new ThemeWidget(QJsonObject());
@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     //    1);
 
     this->sendRequest("vn", 500, {}, vn_fields, "rating", true);
+    this->sendRequest("tag", 100, {}, {"name, vn_count"}, "vn_count", true);
 
     vnTimer.start(100, this);
 }
@@ -117,4 +118,6 @@ void MainWindow::RerequestVN() {
                 widget->getFilter(), vn_fields,
                 widget->m_ui->sortComboBox->currentText(),
                 !widget->m_ui->inverseCheckBox->isChecked());
+
+    widget->m_ui->filterApplyPushButton->setText("应用并抓取数据");
 }

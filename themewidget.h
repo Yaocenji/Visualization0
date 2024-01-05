@@ -1,6 +1,7 @@
 #ifndef THEMEWIDGET_H
 #define THEMEWIDGET_H
 
+#include <QCompleter>
 #include <QtCharts/QAbstractBarSeries>
 #include <QtCharts/QAreaSeries>
 #include <QtCharts/QBarCategoryAxis>
@@ -92,6 +93,8 @@ public slots:
     void updateFilterComboBoxes();
     // 添加过滤器条目
     void addFilter();
+    // 清除过滤器条目
+    void clearFilter();
     // 应用
     void ApplyFilter();
 

@@ -61,9 +61,12 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
             SLOT(updateChartComboBox()));
     updateChartComboBox();
 
-    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
-    connect(m_ui->tagX, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
-    connect(m_ui->tagY, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
+    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(updateFetchButton()));
+    connect(m_ui->tagX, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(updateFetchButton()));
+    connect(m_ui->tagY, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(updateFetchButton()));
 
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
@@ -107,6 +110,16 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     // 连接添加filter行
     QObject::connect(m_ui->filterApplyPushButton, SIGNAL(clicked()), this,
                      SLOT(ApplyFilter()));
+
+    // 连接清空filter行
+    QObject::connect(m_ui->filterDelete, SIGNAL(clicked()), this,
+                     SLOT(clearFilter()));
+
+    // 下拉框可搜索
+    m_ui->filterItemCombobox->setEditable(true);
+    QCompleter *pCompleter = new QCompleter(m_ui->filterItemCombobox->model());
+    pCompleter->setFilterMode(Qt::MatchContains);
+    m_ui->filterItemCombobox->setCompleter(pCompleter);
 }
 
 ThemeWidget::~ThemeWidget() {
@@ -381,7 +394,7 @@ void ThemeWidget::updateChart() {
     QString tagX = m_ui->tagX->currentText();
     QString tagY = m_ui->tagY->currentText();
     m_charts.clear();
-    //m_ui->horizontalLayout->takeAt(1);
+    // m_ui->horizontalLayout->takeAt(1);
     if (chartType == "bar") {
         chartView->setChart(updateBarChart(tagX));
         m_charts << chartView;
@@ -647,6 +660,11 @@ void ThemeWidget::addFilter() {
     m_ui->filterTable->setItem(iRow, 2, itemStatus2);
 }
 
+void ThemeWidget::clearFilter() {
+    m_ui->filterTable->clearContents();
+    m_ui->filterTable->setRowCount(0);
+}
+
 void ThemeWidget::ApplyFilter() {
     qDebug() << "apply";
     auto test = getFilter();
@@ -679,6 +697,11 @@ QVector<QVector<QString>> ThemeWidget::getFilter() {
                 ItemOp = "=";
             else
                 ItemOp = "!=";
+        }
+        if (ItemStr == "tag") {
+            for (const auto &t : tagData) {
+                if (t->name == ItemContent) ItemContentID = t->id;
+            };
         }
 
         ansFilter[line].push_back(ItemStr);

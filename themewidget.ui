@@ -246,7 +246,7 @@
        <item>
         <widget class="QPushButton" name="filterDelete">
          <property name="text">
-          <string>删除过滤器条目</string>
+          <string>清除过滤器条目</string>
          </property>
         </widget>
        </item>
