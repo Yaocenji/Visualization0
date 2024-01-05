@@ -190,6 +190,53 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>抓取数据排序方式</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="sortComboBox">
+           <item>
+            <property name="text">
+             <string>rating</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>votecount</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>released</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>title</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>searchrank</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="inverseCheckBox">
+           <property name="text">
+            <string>反序</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QPushButton" name="filterAdd">
          <property name="text">
           <string>添加到过滤器</string>
@@ -225,6 +272,30 @@
           <string>应用并抓取数据</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>抓取视觉小说数量</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="vnTotelNumberLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>500</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">

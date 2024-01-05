@@ -125,7 +125,7 @@ private:
     QChart *splineChart;
     QChart *scatterChart;
 
-    QMap<QString, QVector<QString> > chartMap;
+    QMap<QString, QVector<QString>> chartMap;
 
 public:
     Ui_ThemeWidgetForm *m_ui;

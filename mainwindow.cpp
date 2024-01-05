@@ -11,6 +11,10 @@ struct ReqArguments {
     uint page;
 } RA[2];
 
+const QVector<QString> vn_fields = {
+    "title",        "languages", "platforms", "length_minutes",
+    "length_votes", "rating",    "votecount"};
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     widget = new ThemeWidget(QJsonObject());
     setCentralWidget(widget);
@@ -32,10 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     //    m->sendRequest("tag", {}, {"name, vn_count"}, "vn_count", true, 100,
     //    1);
 
-    this->sendRequest("vn", 500, {},
-                      {"title", "languages", "platforms", "length_minutes",
-                       "length_votes", "rating", "votecount"},
-                      "rating", true);
+    this->sendRequest("vn", 500, {}, vn_fields, "rating", true);
 
     vnTimer.start(100, this);
 }
@@ -107,4 +108,13 @@ void MainWindow::sendRequest(QString suffix, int totelNumber,
 void MainWindow::RerequestVN() {
     qDebug() << "rerequest vn.";
     widget->clearVnData();
+    //    qDebug() << "arg: " <<
+    //    (widget->m_ui->vnTotelNumberLineEdit->text()).toInt()
+    //             << widget->getFilter() <<
+    //             widget->m_ui->sortComboBox->currentText()
+    //             << widget->m_ui->inverseCheckBox->isChecked();
+    sendRequest("vn", (widget->m_ui->vnTotelNumberLineEdit->text()).toInt(),
+                widget->getFilter(), vn_fields,
+                widget->m_ui->sortComboBox->currentText(),
+                !widget->m_ui->inverseCheckBox->isChecked());
 }

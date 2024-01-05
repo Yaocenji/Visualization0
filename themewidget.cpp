@@ -36,7 +36,8 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     m_ui->chartType->addItems({"bar", "pie", "line", "spline", "scatter"});
 
     QVector<QString> v;
-    v.append({"languages", "length_minutes", "length_votes", "platforms", "rating", "votecount"});
+    v.append({"languages", "length_minutes", "length_votes", "platforms",
+              "rating", "votecount"});
     chartMap.insert("bar", v);
     v.clear();
 
@@ -56,7 +57,8 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     chartMap.insert("scatter", v);
     v.clear();
 
-    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChartComboBox()));
+    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(updateChartComboBox()));
     updateChartComboBox();
 
     connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
@@ -152,7 +154,7 @@ void ThemeWidget::updateChartComboBox() {
     for (int i = 0; i < dataVector.count(); i++) {
         m_ui->tagX->addItem(dataVector[i]);
         m_ui->tagY->addItem(dataVector[i]);
-        //qDebug() << currentChart;
+        // qDebug() << currentChart;
     }
 }
 
@@ -400,7 +402,6 @@ void ThemeWidget::updateChart() {
 void ThemeWidget::updateUI() {
     QChart::ChartTheme theme = QChart::ChartThemeQt;
 
-
     const auto charts = m_charts;
     if (!m_charts.isEmpty() && m_charts.at(0)->chart()->theme() != theme) {
         for (QChartView *chartView : charts) {
@@ -578,6 +579,18 @@ void ThemeWidget::updateFilterComboBoxes() {
         // 重新填入
         m_ui->filterItemCombobox->addItem("true");
         m_ui->filterItemCombobox->addItem("false");
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "tag") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        for (auto &i : tagData) {
+            m_ui->filterItemCombobox->addItem(i->name);
+        }
 
         m_ui->filterItemCombobox->show();
         m_ui->filterOperatorComboBox->hide();
