@@ -37,23 +37,23 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     // Funny things happen if the pie slice labels do not fit the screen,
     // so we ignore size policy
     chartView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    m_ui->gridLayout->addWidget(chartView, 1, 0);
+    m_ui->chartGridLayout->addWidget(chartView, 1, 0);
     m_charts << chartView;
 
     chartView = new QChartView(updateLineChart("length_votes", "rating"));
-    m_ui->gridLayout->addWidget(chartView, 1, 1);
+    m_ui->chartGridLayout->addWidget(chartView, 1, 1);
     m_charts << chartView;
 
     chartView = new QChartView(updateBarChart("languages"));
-    m_ui->gridLayout->addWidget(chartView, 1, 2);
+    m_ui->chartGridLayout->addWidget(chartView, 1, 2);
     m_charts << chartView;
 
     chartView = new QChartView(updateSplineChart("length_votes", "rating"));
-    m_ui->gridLayout->addWidget(chartView, 2, 0);
+    m_ui->chartGridLayout->addWidget(chartView, 2, 0);
     m_charts << chartView;
 
     chartView = new QChartView(updateScatterChart("length_votes", "rating"));
-    m_ui->gridLayout->addWidget(chartView, 2, 1);
+    m_ui->chartGridLayout->addWidget(chartView, 2, 1);
     m_charts << chartView;
 
     // Set defaults
