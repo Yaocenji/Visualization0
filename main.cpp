@@ -23,17 +23,16 @@ int main(int argc, char *argv[]) {
 
     ThemeWidget *widget = new ThemeWidget(QJsonObject());
     window.setCentralWidget(widget);
-    window.resize(900, 600);
+    window.resize(1920, 1080);
     window.show();
 
     myrequester *m = new myrequester();
     QObject::connect(m, SIGNAL(finish(QJsonObject *, QNetworkReply *)), widget,
                      SLOT(addJsonData(QJsonObject *)));
-    m->sendRequest("vn", {{"tag", "=", "g23"}, {"tag", "=", "g45"}},
+    m->sendRequest("vn", {},
                    {"title", "languages", "platforms", "length_minutes",
                     "length_votes", "rating", "votecount"},
-                   "rating", true, 7, 1);
+                   "rating", true, 100, 1);
 
-    //qDebug() << "OpenSSL支持情况:" << QSslSocket::supportsSsl();
     return a.exec();
 }

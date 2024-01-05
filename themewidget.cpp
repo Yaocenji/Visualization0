@@ -66,6 +66,38 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     qApp->setPalette(pal);
 
     updateUI();
+
+    // 将api模板读取
+    QFile tmpfile(":/Schema/enum.json");
+    QString errMsg;
+    QFileDevice::FileError err = QFileDevice::NoError;
+    if (!tmpfile.open(QIODevice::ReadOnly)) {
+        errMsg = tmpfile.errorString();
+        err = tmpfile.error();
+        qDebug() << errMsg << err;
+    }
+    QByteArray data = tmpfile.readAll();
+    tmpfile.close();
+    schema = QJsonDocument::fromJson(data).object();
+
+    // 连接filter下拉菜单改变时与更新函数
+    QObject::connect(m_ui->filterComboBox, SIGNAL(currentIndexChanged(int)),
+                     this, SLOT(updateFilterComboBoxes()));
+    // 先更新一遍
+    updateFilterComboBoxes();
+
+    // filter表
+    m_ui->filterTable->setColumnCount(3);
+    m_ui->filterTable->horizontalHeader()->setSectionResizeMode(
+        QHeaderView::Stretch);
+
+    // 连接添加filter行
+    QObject::connect(m_ui->filterAdd, SIGNAL(clicked()), this,
+                     SLOT(addFilter()));
+
+    // 连接添加filter行
+    QObject::connect(m_ui->filterApplyPushButton, SIGNAL(clicked()), this,
+                     SLOT(ApplyFilter()));
 }
 
 ThemeWidget::~ThemeWidget() {
@@ -433,7 +465,7 @@ void ThemeWidget::updateUI() {
 }
 
 void ThemeWidget::addJsonData(QJsonObject *addData) {
-    qDebug() << "added";
+    qDebug() << "added vn";
     QJsonArray results = (*addData)["results"].toArray();
     for (int i = 0; i < results.count(); i++) {
         QJsonObject galData(results.at(i).toObject());
@@ -453,4 +485,356 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
     updateSplineChart("length_votes", "rating");
     updatePieChart("languages");
     updateBarChart("rating");
+}
+
+// 添加tag数据
+void ThemeWidget::addTagData(QJsonObject *addData) {
+    qDebug() << "added tag";
+    //    QJsonArray results = (*addData)["results"].toArray();
+    //    for (int i = 0; i < results.count(); i++) {
+    //        QJsonObject galData(results.at(i).toObject());
+    //        galgame *gal = new galgame();
+    //        gal->id = galData["id"].toString();
+    //        gal->languages = JsonToStringArray(galData["languages"]);
+    //        gal->length_minutes = galData["length_minutes"].toInt();
+    //        gal->length_votes = galData["length_votes"].toInt();
+    //        gal->platforms = JsonToStringArray(galData["platforms"]);
+    //        gal->rating = galData["rating"].toDouble();
+    //        gal->title = galData["title"].toString();
+    //        gal->votecount = galData["votecount"].toInt();
+    //        m_galgames.append(gal);
+    //    }
+}
+
+void ThemeWidget::updateFilterComboBoxes() {
+    qDebug() << "updateFilterComboBoxes";
+    QString itemText = m_ui->filterComboBox->currentText();
+    if (itemText == "search") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "lang") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        QJsonArray langEnum = schema["language"].toArray();
+        for (const QJsonValue &i : langEnum) {
+            m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
+        }
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "platform") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        QJsonArray langEnum = schema["platform"].toArray();
+        for (const QJsonValue &i : langEnum) {
+            m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
+        }
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "length") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "released") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->show();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "rating") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "votecount") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "has_anime") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        m_ui->filterItemCombobox->addItem("true");
+        m_ui->filterItemCombobox->addItem("false");
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    }
+}
+
+void ThemeWidget::addFilter() {
+    qDebug() << "add Filter";
+    QString itemText = m_ui->filterComboBox->currentText();
+    int iRow = m_ui->filterTable->rowCount();
+    m_ui->filterTable->setRowCount(iRow + 1);
+
+    // 新行内容
+    QString ItemStr, ItemOp, ItemContent;
+
+    // 设置新行内容
+    ItemStr = itemText;
+
+    if (m_ui->filterOperatorComboBox->isHidden())
+        ItemOp = "=";
+    else
+        ItemOp = m_ui->filterOperatorComboBox->currentText();
+
+    if (!m_ui->filterItemCombobox->isHidden())
+        ItemContent = m_ui->filterItemCombobox->currentText();
+    else if (!m_ui->filterDateEdit->isHidden()) {
+        int y, m, d;
+        m_ui->filterDateEdit->date().getDate(&y, &m, &d);
+        QString yStr = QString::number(y);
+        QString mStr = QString::number(m);
+        QString dStr = QString::number(d);
+        if (m < 10) mStr = "0" + mStr;
+        if (d < 10) dStr = "0" + dStr;
+        ItemContent = yStr + "-" + mStr + "-" + dStr;
+    } else if (!m_ui->filterLineEdit->isHidden()) {
+        ItemContent = m_ui->filterLineEdit->text();
+    }
+
+    qDebug() << ItemStr << " " << ItemOp << " " << ItemContent;
+
+    // 将内容设置到表格中
+    QTableWidgetItem *itemStatus0 = new QTableWidgetItem(ItemStr);
+    itemStatus0->setFlags(itemStatus0->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 0, itemStatus0);
+
+    QTableWidgetItem *itemStatus1 = new QTableWidgetItem(ItemOp);
+    itemStatus1->setFlags(itemStatus1->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 1, itemStatus1);
+
+    QTableWidgetItem *itemStatus2 = new QTableWidgetItem(ItemContent);
+    itemStatus2->setFlags(itemStatus2->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 2, itemStatus2);
+}
+
+void ThemeWidget::ApplyFilter() {
+    qDebug() << "apply";
+    auto test = getFilter();
+    qDebug() << test;
+}
+
+QVector<QVector<QString>> ThemeWidget::getFilter() {
+    QVector<QVector<QString>> ansFilter;
+    ansFilter.resize(m_ui->filterTable->rowCount());
+    for (int line = 0; line < m_ui->filterTable->rowCount(); ++line) {
+        QString ItemStr = m_ui->filterTable->item(line, 0)->text();
+        QString ItemOp = m_ui->filterTable->item(line, 1)->text();
+        QString ItemContent = m_ui->filterTable->item(line, 2)->text();
+        QString ItemContentID = ItemContent;
+        if (ItemStr == "lang") {
+            for (const auto &l : schema["language"].toArray()) {
+                if ((l.toObject())["label"] == ItemContent)
+                    ItemContentID = (l.toObject())["id"].toString();
+            };
+        }
+        if (ItemStr == "platform") {
+            for (const auto &l : schema["platform"].toArray()) {
+                if ((l.toObject())["label"] == ItemContent)
+                    ItemContentID = (l.toObject())["id"].toString();
+            };
+        }
+        if (ItemStr == "has_anime") {
+            ItemContentID = "1";
+            if (ItemContent == "true")
+                ItemOp = "=";
+            else
+                ItemOp = "!=";
+        }
+
+        ansFilter[line].push_back(ItemStr);
+        ansFilter[line].push_back(ItemOp);
+        ansFilter[line].push_back(ItemContentID);
+    }
+    return ansFilter;
+}
+
+// 添加tag数据
+void ThemeWidget::addTagData(QJsonObject *addData) {
+    qDebug() << "added tag";
+    //    QJsonArray results = (*addData)["results"].toArray();
+    //    for (int i = 0; i < results.count(); i++) {
+    //        QJsonObject galData(results.at(i).toObject());
+    //        galgame *gal = new galgame();
+    //        gal->id = galData["id"].toString();
+    //        gal->languages = JsonToStringArray(galData["languages"]);
+    //        gal->length_minutes = galData["length_minutes"].toInt();
+    //        gal->length_votes = galData["length_votes"].toInt();
+    //        gal->platforms = JsonToStringArray(galData["platforms"]);
+    //        gal->rating = galData["rating"].toDouble();
+    //        gal->title = galData["title"].toString();
+    //        gal->votecount = galData["votecount"].toInt();
+    //        m_galgames.append(gal);
+    //    }
+}
+
+void ThemeWidget::updateFilterComboBoxes() {
+    qDebug() << "updateFilterComboBoxes";
+    QString itemText = m_ui->filterComboBox->currentText();
+    if (itemText == "search") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "lang") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        QJsonArray langEnum = schema["language"].toArray();
+        for (const QJsonValue &i : langEnum) {
+            m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
+        }
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "platform") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        QJsonArray langEnum = schema["platform"].toArray();
+        for (const QJsonValue &i : langEnum) {
+            m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
+        }
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "length") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "released") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->show();
+        m_ui->filterLineEdit->hide();
+    } else if (itemText == "rating") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "votecount") {
+        m_ui->filterItemCombobox->hide();
+        m_ui->filterOperatorComboBox->show();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->show();
+    } else if (itemText == "has_anime") {
+        // 清空combobox
+        m_ui->filterItemCombobox->clear();
+        // 重新填入
+        m_ui->filterItemCombobox->addItem("true");
+        m_ui->filterItemCombobox->addItem("false");
+
+        m_ui->filterItemCombobox->show();
+        m_ui->filterOperatorComboBox->hide();
+        m_ui->filterDateEdit->hide();
+        m_ui->filterLineEdit->hide();
+    }
+}
+
+void ThemeWidget::addFilter() {
+    qDebug() << "add Filter";
+    QString itemText = m_ui->filterComboBox->currentText();
+    int iRow = m_ui->filterTable->rowCount();
+    m_ui->filterTable->setRowCount(iRow + 1);
+
+    // 新行内容
+    QString ItemStr, ItemOp, ItemContent;
+
+    // 设置新行内容
+    ItemStr = itemText;
+
+    if (m_ui->filterOperatorComboBox->isHidden())
+        ItemOp = "=";
+    else
+        ItemOp = m_ui->filterOperatorComboBox->currentText();
+
+    if (!m_ui->filterItemCombobox->isHidden())
+        ItemContent = m_ui->filterItemCombobox->currentText();
+    else if (!m_ui->filterDateEdit->isHidden()) {
+        int y, m, d;
+        m_ui->filterDateEdit->date().getDate(&y, &m, &d);
+        QString yStr = QString::number(y);
+        QString mStr = QString::number(m);
+        QString dStr = QString::number(d);
+        if (m < 10) mStr = "0" + mStr;
+        if (d < 10) dStr = "0" + dStr;
+        ItemContent = yStr + "-" + mStr + "-" + dStr;
+    } else if (!m_ui->filterLineEdit->isHidden()) {
+        ItemContent = m_ui->filterLineEdit->text();
+    }
+
+    qDebug() << ItemStr << " " << ItemOp << " " << ItemContent;
+
+    // 将内容设置到表格中
+    QTableWidgetItem *itemStatus0 = new QTableWidgetItem(ItemStr);
+    itemStatus0->setFlags(itemStatus0->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 0, itemStatus0);
+
+    QTableWidgetItem *itemStatus1 = new QTableWidgetItem(ItemOp);
+    itemStatus1->setFlags(itemStatus1->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 1, itemStatus1);
+
+    QTableWidgetItem *itemStatus2 = new QTableWidgetItem(ItemContent);
+    itemStatus2->setFlags(itemStatus2->flags() & (~Qt::ItemIsEditable));
+    m_ui->filterTable->setItem(iRow, 2, itemStatus2);
+}
+
+void ThemeWidget::ApplyFilter() {
+    qDebug() << "apply";
+    auto test = getFilter();
+    qDebug() << test;
+}
+
+QVector<QVector<QString>> ThemeWidget::getFilter() {
+    QVector<QVector<QString>> ansFilter;
+    ansFilter.resize(m_ui->filterTable->rowCount());
+    for (int line = 0; line < m_ui->filterTable->rowCount(); ++line) {
+        QString ItemStr = m_ui->filterTable->item(line, 0)->text();
+        QString ItemOp = m_ui->filterTable->item(line, 1)->text();
+        QString ItemContent = m_ui->filterTable->item(line, 2)->text();
+        QString ItemContentID = ItemContent;
+        if (ItemStr == "lang") {
+            for (const auto &l : schema["language"].toArray()) {
+                if ((l.toObject())["label"] == ItemContent)
+                    ItemContentID = (l.toObject())["id"].toString();
+            };
+        }
+        if (ItemStr == "platform") {
+            for (const auto &l : schema["platform"].toArray()) {
+                if ((l.toObject())["label"] == ItemContent)
+                    ItemContentID = (l.toObject())["id"].toString();
+            };
+        }
+        if (ItemStr == "has_anime") {
+            ItemContentID = "1";
+            if (ItemContent == "true")
+                ItemOp = "=";
+            else
+                ItemOp = "!=";
+        }
+
+        ansFilter[line].push_back(ItemStr);
+        ansFilter[line].push_back(ItemOp);
+        ansFilter[line].push_back(ItemContentID);
+    }
+    return ansFilter;
 }

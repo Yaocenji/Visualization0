@@ -37,6 +37,12 @@ public:
     }
 };
 
+struct tag {
+    QString id;
+    QString name;
+    int vn_count;
+};
+
 class myjson {
 public:
     myjson(QJsonObject jsonObject);

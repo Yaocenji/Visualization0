@@ -1,16 +1,12 @@
 #ifndef THEMEWIDGET_H
 #define THEMEWIDGET_H
 
-#include <QtCharts/QChartGlobal>
-#include <QtWidgets/QWidget>
-
-#include "myjson.h"
-
 #include <QtCharts/QAbstractBarSeries>
 #include <QtCharts/QAreaSeries>
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QBarSet>
+#include <QtCharts/QChartGlobal>
 #include <QtCharts/QChartView>
 #include <QtCharts/QLegend>
 #include <QtCharts/QLineSeries>
@@ -30,7 +26,9 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QSpinBox>
+#include <QtWidgets/QWidget>
 
+#include "myjson.h"
 #include "ui_themewidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -83,6 +81,19 @@ private:
 public slots:
     // 添加json数据
     void addJsonData(QJsonObject *addData);
+    // 添加tag数据
+    void addTagData(QJsonObject *addData);
+
+    // 过滤器条目下拉菜单更改时，对应更改后续内容
+    void updateFilterComboBoxes();
+    // 添加过滤器条目
+    void addFilter();
+    // 应用
+    void ApplyFilter();
+
+public:
+    // 根据表格内容，输出filter数组
+    QVector<QVector<QString>> getFilter();
 
 private:
     int m_listCount;
@@ -107,6 +118,12 @@ private:
     QChart *scatterChart;
 
     Ui_ThemeWidgetForm *m_ui;
+
+private:
+    // 模板
+    QJsonObject schema;
+    // 保存的tag数据
+    tag tagData;
 };
 
 #endif /* THEMEWIDGET_H */

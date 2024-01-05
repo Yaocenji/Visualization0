@@ -1,7 +1,6 @@
 QT       += core gui
 QT       += network
 QT       += charts
-INCLUDEPATH += E:\Qt\5.15.2\mingw81_64\bin\OpenSSL-Win64\include
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,3 +32,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    schema.qrc
