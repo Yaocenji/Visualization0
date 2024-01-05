@@ -23,6 +23,7 @@ myjson::myjson(QJsonObject jsonObject) {
         gal->rating = galData["rating"].toDouble();
         gal->title = galData["title"].toString();
         gal->votecount = galData["votecount"].toInt();
+        gal->released = galData["released"].toString();
         galgames.append(gal);
     }
 }

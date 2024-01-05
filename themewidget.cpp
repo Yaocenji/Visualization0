@@ -37,23 +37,23 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
 
     QVector<QString> v;
     v.append({"languages", "length_minutes", "length_votes", "platforms",
-              "rating", "votecount"});
+              "rating", "votecount", "released"});
     chartMap.insert("bar", v);
     v.clear();
 
-    v.append({"languages", "platforms"});
+    v.append({"languages", "platforms", "released"});
     chartMap.insert("pie", v);
     v.clear();
 
-    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    v.append({"length_minutes", "length_votes", "rating", "votecount", "released"});
     chartMap.insert("line", v);
     v.clear();
 
-    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    v.append({"length_minutes", "length_votes", "rating", "votecount", "released"});
     chartMap.insert("spline", v);
     v.clear();
 
-    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    v.append({"length_minutes", "length_votes", "rating", "votecount", "released"});
     chartMap.insert("scatter", v);
     v.clear();
 
@@ -138,12 +138,16 @@ bool cmpByRating(galgame *a, galgame *b) {
 bool cmpByVotecount(galgame *a, galgame *b) {
     return a->votecount > b->votecount;
 }
+bool cmpByReleased(galgame *a, galgame *b) {
+    return a->released > b->released;
+}
 
 bool (*cmp(QString tag))(galgame *a, galgame *b) {
     if (tag == "length_minutes") return cmpByLength_Minutes;
     if (tag == "length_votes") return cmpByLength_Votes;
     if (tag == "rating") return cmpByRating;
     if (tag == "votecount") return cmpByVotecount;
+    if (tag == "released") return cmpByReleased;
     qDebug() << "cmp error";
     return nullptr;
 }
@@ -166,6 +170,7 @@ void ThemeWidget::updateChartComboBox() {
     QVector<QString> dataVector = chartMap.value(currentChart);
     for (int i = 0; i < dataVector.count(); i++) {
         m_ui->tagX->addItem(dataVector[i]);
+        if (dataVector[i] == "released") continue;
         m_ui->tagY->addItem(dataVector[i]);
         // qDebug() << currentChart;
     }
@@ -258,6 +263,33 @@ QChart *ThemeWidget::updateBarChart(QString tag) {
             barSeries->append(set);
             barSeries->setLabelsVisible(true);
         }
+    } else if (tag == "released") {
+        QMap<QString, int> dataMap;
+
+        std::sort(m_galgames.begin(), m_galgames.end(), cmp(tag));
+        int sum = m_galgames.count();
+        for (int i = 0; i < sum; i++) {
+            galgame *gal = m_galgames[i];
+            QString dataString = gal->getString(tag);
+            QStringList curTag = dataString.split('-');
+            qDebug() << dataString;
+            if (dataMap.contains(curTag[0]))
+                dataMap.insert(curTag[0], dataMap[curTag[0]] + 1);
+            else
+                dataMap.insert(curTag[0], 1);
+        }
+
+        QMap<QString, int>::const_iterator it;
+
+        for (it = dataMap.constBegin(); it != dataMap.constEnd(); it++) {
+            QString key = it.key();
+            QBarSet *set = new QBarSet(key);
+            if (it.value() > max) max = it.value();
+            set->append(it.value());
+            set->setLabel(key);
+            barSeries->append(set);
+            barSeries->setLabelsVisible(true);
+        }
     } else {
         for (int i = 0; i < m_galgames.count(); i++) {
             galgame *gal = m_galgames[i];
@@ -289,17 +321,34 @@ QChart *ThemeWidget::updateLineChart(QString tagX, QString tagY) {
     lineSeries->clear();
     double maxX = -1;
     double maxY = -1;
+    double minX = 10000000;
     QList<QPointF> replaceData;
     std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
-    for (int i = 0; i < m_galgames.count(); i++) {
-        galgame *gal = m_galgames[i];
-        if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
-        if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+
+    if (tagX == "released") {
+        std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            QStringList data = gal->getString(tagX).split('-');
+            QString dataString = QString::number(data[0].toDouble() + data[1].toDouble() / 12);
+            if (dataString.toDouble() < minX) minX = dataString.toDouble();
+            if (dataString.toDouble() > maxX) maxX = dataString.toDouble();
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(dataString.toDouble(), gal->getDouble(tagY)));
+        }
+        scatterChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
+    } else {
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            if (gal->getDouble(tagX) < minX) minX = gal->getDouble(tagX);
+            if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+        }
     }
     lineChart->addSeries(lineSeries);
     lineChart->createDefaultAxes();
-    lineChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    lineChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
     lineChart->axes(Qt::Vertical).first()->setRange(0, maxY);
     lineSeries->replace(replaceData);
     lineChart->update();
@@ -310,29 +359,53 @@ QChart *ThemeWidget::updatePieChart(QString tag) {
     pieChart->setTitle("Pie Chart");
     pieSeries->clear();
     QMap<QString, int> replaceData;
-
     int sum = m_galgames.count();
-    for (int i = 0; i < sum; i++) {
-        galgame *gal = m_galgames[i];
-        QVector<QString> dataVector = gal->getVector(tag);
-        for (int j = 0; j < dataVector.count(); j++) {
-            QString curTag = dataVector[j];
+    if (tag == "released") {
+        for (int i = 0; i < sum; i++) {
+            galgame *gal = m_galgames[i];
+            QStringList data = gal->getString(tag).split('-');
+            QString curTag = data[0];
             if (replaceData.contains(curTag))
                 replaceData.insert(curTag, replaceData[curTag] + 1);
             else
                 replaceData.insert(curTag, 1);
         }
-    }
 
-    QMap<QString, int>::const_iterator it;
+        QMap<QString, int>::const_iterator it;
 
-    for (it = replaceData.constBegin(); it != replaceData.constEnd(); it++) {
-        QString key = it.key();
-        QPieSlice *slice = pieSeries->append(key, it.value());
-        if (it == replaceData.constBegin()) {
-            slice->setLabelVisible();
-            slice->setExploded();
-            slice->setExplodeDistanceFactor(0.5);
+        for (it = replaceData.constBegin(); it != replaceData.constEnd(); it++) {
+            QString key = it.key();
+            QPieSlice *slice = pieSeries->append(key, it.value());
+            if (it == replaceData.constBegin()) {
+                slice->setLabelVisible();
+                slice->setExploded();
+                slice->setExplodeDistanceFactor(0.5);
+            }
+        }
+    } else {
+
+        for (int i = 0; i < sum; i++) {
+            galgame *gal = m_galgames[i];
+            QVector<QString> dataVector = gal->getVector(tag);
+            for (int j = 0; j < dataVector.count(); j++) {
+                QString curTag = dataVector[j];
+                if (replaceData.contains(curTag))
+                    replaceData.insert(curTag, replaceData[curTag] + 1);
+                else
+                    replaceData.insert(curTag, 1);
+            }
+        }
+
+        QMap<QString, int>::const_iterator it;
+
+        for (it = replaceData.constBegin(); it != replaceData.constEnd(); it++) {
+            QString key = it.key();
+            QPieSlice *slice = pieSeries->append(key, it.value());
+            if (it == replaceData.constBegin()) {
+                slice->setLabelVisible();
+                slice->setExploded();
+                slice->setExplodeDistanceFactor(0.5);
+            }
         }
     }
 
@@ -350,17 +423,34 @@ QChart *ThemeWidget::updateSplineChart(QString tagX, QString tagY) {
     splineSeries->clear();
     double maxX = -1;
     double maxY = -1;
+    double minX = 10000000;
     QList<QPointF> replaceData;
     std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
-    for (int i = 0; i < m_galgames.count(); i++) {
-        galgame *gal = m_galgames[i];
-        if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
-        if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+    if (tagX == "released") {
+
+        std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            QStringList data = gal->getString(tagX).split('-');
+            QString dataString = QString::number(data[0].toDouble() + data[1].toDouble() / 12);
+            if (dataString.toDouble() < minX) minX = dataString.toDouble();
+            if (dataString.toDouble() > maxX) maxX = dataString.toDouble();
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(dataString.toDouble(), gal->getDouble(tagY)));
+        }
+        scatterChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
+    } else {
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            if (gal->getDouble(tagX) < minX) minX = gal->getDouble(tagX);
+            if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+        }
     }
     splineChart->addSeries(splineSeries);
     splineChart->createDefaultAxes();
-    splineChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    splineChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
     splineChart->axes(Qt::Vertical).first()->setRange(0, maxY);
     splineSeries->replace(replaceData);
     splineChart->update();
@@ -372,16 +462,35 @@ QChart *ThemeWidget::updateScatterChart(QString tagX, QString tagY) {
     scatterSeries->clear();
     double maxX = -1;
     double maxY = -1;
+    double minX = 10000000;
     QList<QPointF> replaceData;
-    for (int i = 0; i < m_galgames.count(); i++) {
-        galgame *gal = m_galgames[i];
-        if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
-        if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+
+    if (tagX == "released") {
+
+        std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            QStringList data = gal->getString(tagX).split('-');
+            QString dataString = QString::number(data[0].toDouble() + data[1].toDouble() / 12);
+            if (dataString.toDouble() < minX) minX = dataString.toDouble();
+            if (dataString.toDouble() > maxX) maxX = dataString.toDouble();
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(dataString.toDouble(), gal->getDouble(tagY)));
+        }
+        scatterChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
+    } else {
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            if (gal->getDouble(tagX) < minX) minX = gal->getDouble(tagX);
+            if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+            if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+            replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+        }
     }
+
     scatterChart->addSeries(scatterSeries);
     scatterChart->createDefaultAxes();
-    scatterChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    scatterChart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
     scatterChart->axes(Qt::Vertical).first()->setRange(0, maxY);
     // qDebug() << replaceData;
     scatterSeries->replace(replaceData);
@@ -495,6 +604,7 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
         gal->rating = galData["rating"].toDouble();
         gal->title = galData["title"].toString();
         gal->votecount = galData["votecount"].toInt();
+        gal->released = galData["released"].toString();
         m_galgames.append(gal);
     }
     qDebug() << "added vn."
@@ -515,7 +625,7 @@ void ThemeWidget::addTagData(QJsonObject *addData) {
         newTag->vn_count = tagJsonData["vn_count"].toInt(0);
         tagData.append(newTag);
 
-        qDebug() << "added tag " << tagJsonData["name"].toString();
+        //qDebug() << "added tag " << tagJsonData["name"].toString();
     }
 }
 

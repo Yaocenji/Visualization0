@@ -20,6 +20,7 @@ public:
     float rating;
     QString title;
     int votecount;
+    QString released;
     double getDouble(QString tag) {
         if (tag == "length_minutes") return length_minutes;
         if (tag == "length_votes") return length_votes;
@@ -34,6 +35,12 @@ public:
         if (tag == "platforms") return platforms;
         qDebug() << "getVector type error";
         return QVector<QString>();
+    }
+
+    QString getString(QString tag) {
+        if (tag == "released") return released;
+        qDebug() << "getString type error";
+        return "-1";
     }
 };
 
