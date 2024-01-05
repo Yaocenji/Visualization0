@@ -17,6 +17,10 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
 
     // create charts
 
+    chartView = new QChartView();
+    chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_ui->horizontalLayout->addWidget(chartView);
+
     barChart = new QChart();
     pieChart = new QChart();
     lineChart = new QChart();
@@ -371,31 +375,21 @@ void ThemeWidget::updateChart() {
     QString tagX = m_ui->tagX->currentText();
     QString tagY = m_ui->tagY->currentText();
     m_charts.clear();
-    m_ui->horizontalLayout->takeAt(1);
+    //m_ui->horizontalLayout->takeAt(1);
     if (chartType == "bar") {
-        chartView = new QChartView(updateBarChart(tagX));
-        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_ui->horizontalLayout->addWidget(chartView, 1);
+        chartView->setChart(updateBarChart(tagX));
         m_charts << chartView;
     } else if (chartType == "line") {
-        chartView = new QChartView(updateLineChart(tagX, tagY));
-        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_ui->horizontalLayout->addWidget(chartView, 1);
+        chartView->setChart(updateLineChart(tagX, tagY));
         m_charts << chartView;
     } else if (chartType == "pie") {
-        chartView = new QChartView(updatePieChart(tagX));
-        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_ui->horizontalLayout->addWidget(chartView, 1);
+        chartView->setChart(updatePieChart(tagX));
         m_charts << chartView;
     } else if (chartType == "spline") {
-        chartView = new QChartView(updateSplineChart(tagX, tagY));
-        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_ui->horizontalLayout->addWidget(chartView, 1);
+        chartView->setChart(updateSplineChart(tagX, tagY));
         m_charts << chartView;
     } else if (chartType == "scatter") {
-        chartView = new QChartView(updateScatterChart(tagX, tagY));
-        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_ui->horizontalLayout->addWidget(chartView, 1);
+        chartView->setChart(updateScatterChart(tagX, tagY));
         m_charts << chartView;
     }
 }
