@@ -29,32 +29,35 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     splineSeries = new QSplineSeries();
     scatterSeries = new QScatterSeries();
 
-    //        chartView = new QChartView(createAreaChart());
-    //        m_ui->gridLayout->addWidget(chartView, 1, 0);
-    //        m_charts << chartView;
+    m_ui->chartType->addItems({"bar", "pie", "line", "spline", "scatter"});
 
-    chartView = new QChartView(updatePieChart("languages"));
-    // Funny things happen if the pie slice labels do not fit the screen,
-    // so we ignore size policy
-    chartView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    m_ui->chartGridLayout->addWidget(chartView, 1, 0);
-    m_charts << chartView;
+    QVector<QString> v;
+    v.append({"languages", "length_minutes", "length_votes", "platforms", "rating", "votecount"});
+    chartMap.insert("bar", v);
+    v.clear();
 
-    chartView = new QChartView(updateLineChart("length_votes", "rating"));
-    m_ui->chartGridLayout->addWidget(chartView, 1, 1);
-    m_charts << chartView;
+    v.append({"languages", "platforms"});
+    chartMap.insert("pie", v);
+    v.clear();
 
-    chartView = new QChartView(updateBarChart("languages"));
-    m_ui->chartGridLayout->addWidget(chartView, 1, 2);
-    m_charts << chartView;
+    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    chartMap.insert("line", v);
+    v.clear();
 
-    chartView = new QChartView(updateSplineChart("length_votes", "rating"));
-    m_ui->chartGridLayout->addWidget(chartView, 2, 0);
-    m_charts << chartView;
+    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    chartMap.insert("spline", v);
+    v.clear();
 
-    chartView = new QChartView(updateScatterChart("length_votes", "rating"));
-    m_ui->chartGridLayout->addWidget(chartView, 2, 1);
-    m_charts << chartView;
+    v.append({"length_minutes", "length_votes", "rating", "votecount"});
+    chartMap.insert("scatter", v);
+    v.clear();
+
+    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChartComboBox()));
+    updateChartComboBox();
+
+    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
+    connect(m_ui->tagX, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
+    connect(m_ui->tagY, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
 
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
@@ -104,11 +107,6 @@ ThemeWidget::~ThemeWidget() {
     delete m_ui;
 }
 
-// DataTable ThemeWidget::getData(QJsonObject jsonObject)
-//{
-
-//}
-
 bool cmpByLength_Minutes(galgame *a, galgame *b) {
     return a->length_minutes > b->length_minutes;
 }
@@ -129,6 +127,25 @@ bool (*cmp(QString tag))(galgame *a, galgame *b) {
     if (tag == "votecount") return cmpByVotecount;
     qDebug() << "cmp error";
     return nullptr;
+}
+
+void ThemeWidget::updateChartComboBox() {
+    QString currentChart = m_ui->chartType->currentText();
+    m_ui->tagX->clear();
+    m_ui->tagY->clear();
+    if (currentChart == "bar" || currentChart == "pie") {
+        m_ui->tagY->hide();
+        m_ui->lable_tagY->hide();
+    } else {
+        m_ui->tagY->show();
+        m_ui->lable_tagY->show();
+    }
+    QVector<QString> dataVector = chartMap.value(currentChart);
+    for (int i = 0; i < dataVector.count(); i++) {
+        m_ui->tagX->addItem(dataVector[i]);
+        m_ui->tagY->addItem(dataVector[i]);
+        //qDebug() << currentChart;
+    }
 }
 
 DataTable ThemeWidget::generateRandomData(int listCount, int valueMax,
@@ -185,44 +202,6 @@ void ThemeWidget::populateLegendBox() {
     //    m_ui->legendComboBox->addItem("Legend Left", Qt::AlignLeft);
     //    m_ui->legendComboBox->addItem("Legend Right", Qt::AlignRight);
 }
-
-// QChart *ThemeWidget::createAreaChart() const {
-//     QChart *chart = new QChart();
-//     chart->setTitle("Area chart");
-
-//    QLineSeries *lowerSeries = 0;
-//    QString name("Series ");
-//    int nameIndex = 0;
-//    for (int i(0); i < m_dataTable.count(); i++) {
-//        QLineSeries *upperSeries = new QLineSeries(chart);
-//        for (int j(0); j < m_dataTable[i].count(); j++) {
-//            Data data = m_dataTable[i].at(j);
-//            if (lowerSeries) {
-//                const QVector<QPointF> &points = lowerSeries->pointsVector();
-//                upperSeries->append(QPointF(j, points[i].y() +
-//                data.first.y()));
-//            } else {
-//                upperSeries->append(QPointF(j, data.first.y()));
-//            }
-//        }
-//        QAreaSeries *area = new QAreaSeries(upperSeries, lowerSeries);
-//        area->setName(name + QString::number(nameIndex));
-//        nameIndex++;
-//        chart->addSeries(area);
-//        lowerSeries = upperSeries;
-//    }
-
-//    chart->createDefaultAxes();
-//    chart->axes(Qt::Horizontal).first()->setRange(0, m_valueCount - 1);
-//    chart->axes(Qt::Vertical).first()->setRange(0, m_valueMax);
-//    // Add space to label to add space between labels and axis
-//    QValueAxis *axisY =
-//        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
-//    Q_ASSERT(axisY);
-//    axisY->setLabelFormat("%.1f  ");
-
-//    return chart;
-//}
 
 QChart *ThemeWidget::updateBarChart(QString tag) {
     barChart->setTitle("Bar chart");
@@ -334,6 +313,7 @@ QChart *ThemeWidget::updatePieChart(QString tag) {
         }
     }
 
+    pieSeries->setLabelsVisible(true);
     pieChart->addSeries(pieSeries);
 
     pieSeries->setPieSize(0.4);
@@ -386,29 +366,55 @@ QChart *ThemeWidget::updateScatterChart(QString tagX, QString tagY) {
     return scatterChart;
 }
 
+void ThemeWidget::updateChart() {
+    QString chartType = m_ui->chartType->currentText();
+    QString tagX = m_ui->tagX->currentText();
+    QString tagY = m_ui->tagY->currentText();
+    m_charts.clear();
+    m_ui->horizontalLayout->takeAt(1);
+    if (chartType == "bar") {
+        chartView = new QChartView(updateBarChart(tagX));
+        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_ui->horizontalLayout->addWidget(chartView, 1);
+        m_charts << chartView;
+    } else if (chartType == "line") {
+        chartView = new QChartView(updateLineChart(tagX, tagY));
+        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_ui->horizontalLayout->addWidget(chartView, 1);
+        m_charts << chartView;
+    } else if (chartType == "pie") {
+        chartView = new QChartView(updatePieChart(tagX));
+        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_ui->horizontalLayout->addWidget(chartView, 1);
+        m_charts << chartView;
+    } else if (chartType == "spline") {
+        chartView = new QChartView(updateSplineChart(tagX, tagY));
+        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_ui->horizontalLayout->addWidget(chartView, 1);
+        m_charts << chartView;
+    } else if (chartType == "scatter") {
+        chartView = new QChartView(updateScatterChart(tagX, tagY));
+        chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_ui->horizontalLayout->addWidget(chartView, 1);
+        m_charts << chartView;
+    }
+}
 void ThemeWidget::updateUI() {
-    //![6]
-    //    QChart::ChartTheme theme = static_cast<QChart::ChartTheme>(
-    //        m_ui->themeComboBox->itemData(m_ui->themeComboBox->currentIndex())
-    //            .toInt());
     QChart::ChartTheme theme = QChart::ChartThemeQt;
 
-    //![6]
+
     const auto charts = m_charts;
     if (!m_charts.isEmpty() && m_charts.at(0)->chart()->theme() != theme) {
         for (QChartView *chartView : charts) {
-            //![7]
             chartView->chart()->setTheme(theme);
-            //![7]
         }
 
         // Set palette colors based on selected theme
-        //![8]
+
         QPalette pal = window()->palette();
         if (theme == QChart::ChartThemeLight) {
             pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
             pal.setColor(QPalette::WindowText, QRgb(0x404044));
-            //![8]
         } else if (theme == QChart::ChartThemeDark) {
             pal.setColor(QPalette::Window, QRgb(0x121218));
             pal.setColor(QPalette::WindowText, QRgb(0xd6d6d6));
@@ -442,10 +448,6 @@ void ThemeWidget::updateUI() {
     //![11]
 
     // Update animation options
-    //![9]
-    //    QChart::AnimationOptions options(
-    //        m_ui->animatedComboBox->itemData(m_ui->animatedComboBox->currentIndex())
-    //            .toInt());
     QChart::AnimationOptions options(QChart::AllAnimations);
     if (!m_charts.isEmpty() &&
         m_charts.at(0)->chart()->animationOptions() != options) {
@@ -455,10 +457,6 @@ void ThemeWidget::updateUI() {
     //![9]
 
     // Update legend alignment
-    //![10]
-    //    Qt::Alignment alignment(
-    //        m_ui->legendComboBox->itemData(m_ui->legendComboBox->currentIndex())
-    //            .toInt());
     Qt::Alignment alignment(0);
 
     if (!alignment) {
@@ -470,7 +468,6 @@ void ThemeWidget::updateUI() {
             chartView->chart()->legend()->show();
         }
     }
-    //![10]
 }
 
 void ThemeWidget::addJsonData(QJsonObject *addData) {
@@ -489,11 +486,7 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
         gal->votecount = galData["votecount"].toInt();
         m_galgames.append(gal);
     }
-    updateScatterChart("length_votes", "rating");
-    updateLineChart("length_votes", "rating");
-    updateSplineChart("length_votes", "rating");
-    updatePieChart("languages");
-    updateBarChart("rating");
+    updateChart();
 }
 
 // 添加tag数据
@@ -671,179 +664,3 @@ QVector<QVector<QString>> ThemeWidget::getFilter() {
     }
     return ansFilter;
 }
-
-//// 添加tag数据
-// void ThemeWidget::addTagData(QJsonObject *addData) {
-//     qDebug() << "added tag";
-//     //    QJsonArray results = (*addData)["results"].toArray();
-//     //    for (int i = 0; i < results.count(); i++) {
-//     //        QJsonObject galData(results.at(i).toObject());
-//     //        galgame *gal = new galgame();
-//     //        gal->id = galData["id"].toString();
-//     //        gal->languages = JsonToStringArray(galData["languages"]);
-//     //        gal->length_minutes = galData["length_minutes"].toInt();
-//     //        gal->length_votes = galData["length_votes"].toInt();
-//     //        gal->platforms = JsonToStringArray(galData["platforms"]);
-//     //        gal->rating = galData["rating"].toDouble();
-//     //        gal->title = galData["title"].toString();
-//     //        gal->votecount = galData["votecount"].toInt();
-//     //        m_galgames.append(gal);
-//     //    }
-// }
-
-// void ThemeWidget::updateFilterComboBoxes() {
-//     qDebug() << "updateFilterComboBoxes";
-//     QString itemText = m_ui->filterComboBox->currentText();
-//     if (itemText == "search") {
-//         m_ui->filterItemCombobox->hide();
-//         m_ui->filterOperatorComboBox->hide();
-//         m_ui->filterDateEdit->hide();
-//         m_ui->filterLineEdit->show();
-//     } else if (itemText == "lang") {
-//         // 清空combobox
-//         m_ui->filterItemCombobox->clear();
-//         // 重新填入
-//         QJsonArray langEnum = schema["language"].toArray();
-//         for (const QJsonValue &i : langEnum) {
-//             m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
-//         }
-
-//        m_ui->filterItemCombobox->show();
-//        m_ui->filterOperatorComboBox->hide();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->hide();
-//    } else if (itemText == "platform") {
-//        // 清空combobox
-//        m_ui->filterItemCombobox->clear();
-//        // 重新填入
-//        QJsonArray langEnum = schema["platform"].toArray();
-//        for (const QJsonValue &i : langEnum) {
-//            m_ui->filterItemCombobox->addItem(i.toObject()["label"].toString());
-//        }
-
-//        m_ui->filterItemCombobox->show();
-//        m_ui->filterOperatorComboBox->hide();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->hide();
-//    } else if (itemText == "length") {
-//        m_ui->filterItemCombobox->hide();
-//        m_ui->filterOperatorComboBox->show();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->show();
-//    } else if (itemText == "released") {
-//        m_ui->filterItemCombobox->hide();
-//        m_ui->filterOperatorComboBox->show();
-//        m_ui->filterDateEdit->show();
-//        m_ui->filterLineEdit->hide();
-//    } else if (itemText == "rating") {
-//        m_ui->filterItemCombobox->hide();
-//        m_ui->filterOperatorComboBox->show();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->show();
-//    } else if (itemText == "votecount") {
-//        m_ui->filterItemCombobox->hide();
-//        m_ui->filterOperatorComboBox->show();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->show();
-//    } else if (itemText == "has_anime") {
-//        // 清空combobox
-//        m_ui->filterItemCombobox->clear();
-//        // 重新填入
-//        m_ui->filterItemCombobox->addItem("true");
-//        m_ui->filterItemCombobox->addItem("false");
-
-//        m_ui->filterItemCombobox->show();
-//        m_ui->filterOperatorComboBox->hide();
-//        m_ui->filterDateEdit->hide();
-//        m_ui->filterLineEdit->hide();
-//    }
-//}
-
-// void ThemeWidget::addFilter() {
-//     qDebug() << "add Filter";
-//     QString itemText = m_ui->filterComboBox->currentText();
-//     int iRow = m_ui->filterTable->rowCount();
-//     m_ui->filterTable->setRowCount(iRow + 1);
-
-//    // 新行内容
-//    QString ItemStr, ItemOp, ItemContent;
-
-//    // 设置新行内容
-//    ItemStr = itemText;
-
-//    if (m_ui->filterOperatorComboBox->isHidden())
-//        ItemOp = "=";
-//    else
-//        ItemOp = m_ui->filterOperatorComboBox->currentText();
-
-//    if (!m_ui->filterItemCombobox->isHidden())
-//        ItemContent = m_ui->filterItemCombobox->currentText();
-//    else if (!m_ui->filterDateEdit->isHidden()) {
-//        int y, m, d;
-//        m_ui->filterDateEdit->date().getDate(&y, &m, &d);
-//        QString yStr = QString::number(y);
-//        QString mStr = QString::number(m);
-//        QString dStr = QString::number(d);
-//        if (m < 10) mStr = "0" + mStr;
-//        if (d < 10) dStr = "0" + dStr;
-//        ItemContent = yStr + "-" + mStr + "-" + dStr;
-//    } else if (!m_ui->filterLineEdit->isHidden()) {
-//        ItemContent = m_ui->filterLineEdit->text();
-//    }
-
-//    qDebug() << ItemStr << " " << ItemOp << " " << ItemContent;
-
-//    // 将内容设置到表格中
-//    QTableWidgetItem *itemStatus0 = new QTableWidgetItem(ItemStr);
-//    itemStatus0->setFlags(itemStatus0->flags() & (~Qt::ItemIsEditable));
-//    m_ui->filterTable->setItem(iRow, 0, itemStatus0);
-
-//    QTableWidgetItem *itemStatus1 = new QTableWidgetItem(ItemOp);
-//    itemStatus1->setFlags(itemStatus1->flags() & (~Qt::ItemIsEditable));
-//    m_ui->filterTable->setItem(iRow, 1, itemStatus1);
-
-//    QTableWidgetItem *itemStatus2 = new QTableWidgetItem(ItemContent);
-//    itemStatus2->setFlags(itemStatus2->flags() & (~Qt::ItemIsEditable));
-//    m_ui->filterTable->setItem(iRow, 2, itemStatus2);
-//}
-
-// void ThemeWidget::ApplyFilter() {
-//     qDebug() << "apply";
-//     auto test = getFilter();
-//     qDebug() << test;
-// }
-
-// QVector<QVector<QString>> ThemeWidget::getFilter() {
-//     QVector<QVector<QString>> ansFilter;
-//     ansFilter.resize(m_ui->filterTable->rowCount());
-//     for (int line = 0; line < m_ui->filterTable->rowCount(); ++line) {
-//         QString ItemStr = m_ui->filterTable->item(line, 0)->text();
-//         QString ItemOp = m_ui->filterTable->item(line, 1)->text();
-//         QString ItemContent = m_ui->filterTable->item(line, 2)->text();
-//         QString ItemContentID = ItemContent;
-//         if (ItemStr == "lang") {
-//             for (const auto &l : schema["language"].toArray()) {
-//                 if ((l.toObject())["label"] == ItemContent)
-//                     ItemContentID = (l.toObject())["id"].toString();
-//             };
-//         }
-//         if (ItemStr == "platform") {
-//             for (const auto &l : schema["platform"].toArray()) {
-//                 if ((l.toObject())["label"] == ItemContent)
-//                     ItemContentID = (l.toObject())["id"].toString();
-//             };
-//         }
-//         if (ItemStr == "has_anime") {
-//             ItemContentID = "1";
-//             if (ItemContent == "true")
-//                 ItemOp = "=";
-//             else
-//                 ItemOp = "!=";
-//         }
-
-//        ansFilter[line].push_back(ItemStr);
-//        ansFilter[line].push_back(ItemOp);
-//        ansFilter[line].push_back(ItemContentID);
-//    }
-//    return ansFilter;
-//}

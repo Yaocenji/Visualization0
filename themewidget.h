@@ -67,6 +67,7 @@ private:
     DataTable getData(QJsonObject jsonObject);
     DataTable generateRandomData(int listCount, int valueMax,
                                  int valueCount) const;
+
     void populateThemeBox();
     void populateAnimationBox();
     void populateLegendBox();
@@ -90,6 +91,10 @@ public slots:
     void addFilter();
     // 应用
     void ApplyFilter();
+
+
+    void updateChartComboBox();
+    void updateChart();
 
 public:
     // 根据表格内容，输出filter数组
@@ -116,6 +121,8 @@ private:
     QChart *lineChart;
     QChart *splineChart;
     QChart *scatterChart;
+
+    QMap<QString, QVector<QString> > chartMap;
 
     Ui_ThemeWidgetForm *m_ui;
 
