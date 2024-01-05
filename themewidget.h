@@ -52,12 +52,12 @@ class ThemeWidget : public QWidget {
     Q_OBJECT
 public:
     explicit ThemeWidget(QJsonObject jsonObject, QWidget *parent = 0);
-    void sortByTag(QString tag, QVector<galgame*> &galgames);
-    QChart* updateBarChart(QString tag);
-    QChart* updatePieChart(QString tag);
-    QChart* updateLineChart(QString tagX, QString tagY);
-    QChart* updateSplineChart(QString tagX, QString tagY);
-    QChart* updateScatterChart(QString tagX, QString tagY);
+    void sortByTag(QString tag, QVector<galgame *> &galgames);
+    QChart *updateBarChart(QString tag);
+    QChart *updatePieChart(QString tag);
+    QChart *updateLineChart(QString tagX, QString tagY);
+    QChart *updateSplineChart(QString tagX, QString tagY);
+    QChart *updateScatterChart(QString tagX, QString tagY);
     ~ThemeWidget();
 
 private Q_SLOTS:
@@ -72,18 +72,21 @@ private:
     void populateAnimationBox();
     void populateLegendBox();
     void connectSignals();
-//    QChart *createAreaChart() const;
-//    QChart *createBarChart(QString tag) const;
-//    QChart *createPieChart(QString tag) const;
-//    QChart *createLineChart(QString tagX, QString tagY) const;
-//    QChart *createSplineChart(QString tagX, QString tagY) const;
-//    QChart *createScatterChart(QString tagX, QString tagY) const;
+    //    QChart *createAreaChart() const;
+    //    QChart *createBarChart(QString tag) const;
+    //    QChart *createPieChart(QString tag) const;
+    //    QChart *createLineChart(QString tagX, QString tagY) const;
+    //    QChart *createSplineChart(QString tagX, QString tagY) const;
+    //    QChart *createScatterChart(QString tagX, QString tagY) const;
 
 public slots:
     // 添加json数据
     void addJsonData(QJsonObject *addData);
     // 添加tag数据
     void addTagData(QJsonObject *addData);
+
+    // 清空vn数据
+    void clearVnData();
 
     // 过滤器条目下拉菜单更改时，对应更改后续内容
     void updateFilterComboBoxes();
@@ -110,11 +113,11 @@ private:
 
     QChartView *chartView;
 
-    QBarSeries* barSeries;
-    QPieSeries* pieSeries;
-    QLineSeries* lineSeries;
-    QSplineSeries* splineSeries;
-    QScatterSeries* scatterSeries;
+    QBarSeries *barSeries;
+    QPieSeries *pieSeries;
+    QLineSeries *lineSeries;
+    QSplineSeries *splineSeries;
+    QScatterSeries *scatterSeries;
 
     QChart *barChart;
     QChart *pieChart;
@@ -124,13 +127,16 @@ private:
 
     QMap<QString, QVector<QString> > chartMap;
 
+    QMap<QString, QVector<QString> > chartMap;
+
+public:
     Ui_ThemeWidgetForm *m_ui;
 
 private:
     // 模板
     QJsonObject schema;
     // 保存的tag数据
-    tag tagData;
+    QVector<tag *> tagData;
 };
 
 #endif /* THEMEWIDGET_H */

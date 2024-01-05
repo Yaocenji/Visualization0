@@ -360,7 +360,7 @@ QChart *ThemeWidget::updateScatterChart(QString tagX, QString tagY) {
     scatterChart->createDefaultAxes();
     scatterChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
     scatterChart->axes(Qt::Vertical).first()->setRange(0, maxY);
-    qDebug() << replaceData;
+    // qDebug() << replaceData;
     scatterSeries->replace(replaceData);
     scatterChart->update();
     return scatterChart;
@@ -471,7 +471,6 @@ void ThemeWidget::updateUI() {
 }
 
 void ThemeWidget::addJsonData(QJsonObject *addData) {
-    qDebug() << "added vn";
     QJsonArray results = (*addData)["results"].toArray();
     for (int i = 0; i < results.count(); i++) {
         QJsonObject galData(results.at(i).toObject());
@@ -486,26 +485,39 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
         gal->votecount = galData["votecount"].toInt();
         m_galgames.append(gal);
     }
+    qDebug() << "added vn."
+             << "there are " << m_galgames.size() << " vns now.";
+
     updateChart();
 }
 
 // 添加tag数据
 void ThemeWidget::addTagData(QJsonObject *addData) {
     qDebug() << "added tag";
-    //    QJsonArray results = (*addData)["results"].toArray();
-    //    for (int i = 0; i < results.count(); i++) {
-    //        QJsonObject galData(results.at(i).toObject());
-    //        galgame *gal = new galgame();
-    //        gal->id = galData["id"].toString();
-    //        gal->languages = JsonToStringArray(galData["languages"]);
-    //        gal->length_minutes = galData["length_minutes"].toInt();
-    //        gal->length_votes = galData["length_votes"].toInt();
-    //        gal->platforms = JsonToStringArray(galData["platforms"]);
-    //        gal->rating = galData["rating"].toDouble();
-    //        gal->title = galData["title"].toString();
-    //        gal->votecount = galData["votecount"].toInt();
-    //        m_galgames.append(gal);
-    //    }
+    QJsonArray results = (*addData)["results"].toArray();
+    for (int i = 0; i < results.count(); i++) {
+        QJsonObject tagJsonData(results.at(i).toObject());
+        tag *newTag = new tag();
+        newTag->id = tagJsonData["id"].toString();
+        newTag->name = tagJsonData["name"].toString();
+        newTag->vn_count = tagJsonData["vn_count"].toInt(0);
+        tagData.append(newTag);
+
+        qDebug() << "added tag " << tagJsonData["name"].toString();
+    }
+}
+
+void ThemeWidget::clearVnData() {
+    for (int i = 0; i < m_galgames.size(); ++i) {
+        delete m_galgames[i];
+    }
+    m_galgames.clear();
+
+    updateScatterChart("length_votes", "rating");
+    updateLineChart("length_votes", "rating");
+    updateSplineChart("length_votes", "rating");
+    updatePieChart("languages");
+    updateBarChart("rating");
 }
 
 void ThemeWidget::updateFilterComboBoxes() {

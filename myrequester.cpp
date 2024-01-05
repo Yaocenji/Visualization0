@@ -88,16 +88,24 @@ void myrequester::finishRequest(QNetworkReply *reply) {
     if (err != QNetworkReply::NoError) {
         qDebug() << "Failed: " << reply->errorString();
         // 发出信号
-        emit finish(&emptyJsonObj, reply);
+        emit finishVn(&emptyJsonObj, reply);
     } else {
         // 获取返回内容
         QJsonDocument doc = QJsonDocument::fromJson(bytes);
         QJsonObject json = doc.object();
 
-        qDebug() << "ResultJson: \n" << json << "\n\n";
+        // qDebug() << "ResultJson: \n" << json << "\n\n";
         loginResultJson = QString::fromStdString(bytes.toStdString());
         // 处理返回数据
         // 发出信号
-        emit finish(&json, reply);
+        if (reply->request().url().toString().contains("/vn",
+                                                       Qt::CaseSensitive)) {
+            qDebug() << "receive vn data";
+            emit finishVn(&json, reply);
+        } else if (reply->request().url().toString().contains(
+                       "/tag", Qt::CaseSensitive)) {
+            qDebug() << "receive tag data";
+            emit finishTag(&json, reply);
+        }
     }
 }

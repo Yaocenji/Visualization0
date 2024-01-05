@@ -32,7 +32,8 @@ public slots:
     void finishRequest(QNetworkReply *reply);
 
 signals:
-    void finish(QJsonObject *jsonInfo, QNetworkReply *rawReply);
+    void finishVn(QJsonObject *jsonInfo, QNetworkReply *rawReply);
+    void finishTag(QJsonObject *jsonInfo, QNetworkReply *rawReply);
 
 public:
     QString urlbase0 = {"https://api.vndb.org/kana/"};
