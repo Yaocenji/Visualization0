@@ -155,33 +155,35 @@ DataTable ThemeWidget::generateRandomData(int listCount, int valueMax,
 }
 
 void ThemeWidget::populateThemeBox() {
-    m_ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
-    m_ui->themeComboBox->addItem("Blue Cerulean",
-                                 QChart::ChartThemeBlueCerulean);
-    m_ui->themeComboBox->addItem("Dark", QChart::ChartThemeDark);
-    m_ui->themeComboBox->addItem("Brown Sand", QChart::ChartThemeBrownSand);
-    m_ui->themeComboBox->addItem("Blue NCS", QChart::ChartThemeBlueNcs);
-    m_ui->themeComboBox->addItem("High Contrast",
-                                 QChart::ChartThemeHighContrast);
-    m_ui->themeComboBox->addItem("Blue Icy", QChart::ChartThemeBlueIcy);
-    m_ui->themeComboBox->addItem("Qt", QChart::ChartThemeQt);
+    //    m_ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
+    //    m_ui->themeComboBox->addItem("Blue Cerulean",
+    //                                 QChart::ChartThemeBlueCerulean);
+    //    m_ui->themeComboBox->addItem("Dark", QChart::ChartThemeDark);
+    //    m_ui->themeComboBox->addItem("Brown Sand",
+    //    QChart::ChartThemeBrownSand); m_ui->themeComboBox->addItem("Blue NCS",
+    //    QChart::ChartThemeBlueNcs); m_ui->themeComboBox->addItem("High
+    //    Contrast",
+    //                                 QChart::ChartThemeHighContrast);
+    //    m_ui->themeComboBox->addItem("Blue Icy", QChart::ChartThemeBlueIcy);
+    //    m_ui->themeComboBox->addItem("Qt", QChart::ChartThemeQt);
 }
 
 void ThemeWidget::populateAnimationBox() {
-    m_ui->animatedComboBox->addItem("No Animations", QChart::NoAnimation);
-    m_ui->animatedComboBox->addItem("GridAxis Animations",
-                                    QChart::GridAxisAnimations);
-    m_ui->animatedComboBox->addItem("Series Animations",
-                                    QChart::SeriesAnimations);
-    m_ui->animatedComboBox->addItem("All Animations", QChart::AllAnimations);
+    //    m_ui->animatedComboBox->addItem("No Animations", QChart::NoAnimation);
+    //    m_ui->animatedComboBox->addItem("GridAxis Animations",
+    //                                    QChart::GridAxisAnimations);
+    //    m_ui->animatedComboBox->addItem("Series Animations",
+    //                                    QChart::SeriesAnimations);
+    //    m_ui->animatedComboBox->addItem("All Animations",
+    //    QChart::AllAnimations);
 }
 
 void ThemeWidget::populateLegendBox() {
-    m_ui->legendComboBox->addItem("No Legend ", 0);
-    m_ui->legendComboBox->addItem("Legend Top", Qt::AlignTop);
-    m_ui->legendComboBox->addItem("Legend Bottom", Qt::AlignBottom);
-    m_ui->legendComboBox->addItem("Legend Left", Qt::AlignLeft);
-    m_ui->legendComboBox->addItem("Legend Right", Qt::AlignRight);
+    //    m_ui->legendComboBox->addItem("No Legend ", 0);
+    //    m_ui->legendComboBox->addItem("Legend Top", Qt::AlignTop);
+    //    m_ui->legendComboBox->addItem("Legend Bottom", Qt::AlignBottom);
+    //    m_ui->legendComboBox->addItem("Legend Left", Qt::AlignLeft);
+    //    m_ui->legendComboBox->addItem("Legend Right", Qt::AlignRight);
 }
 
 // QChart *ThemeWidget::createAreaChart() const {
@@ -386,9 +388,11 @@ QChart *ThemeWidget::updateScatterChart(QString tagX, QString tagY) {
 
 void ThemeWidget::updateUI() {
     //![6]
-    QChart::ChartTheme theme = static_cast<QChart::ChartTheme>(
-        m_ui->themeComboBox->itemData(m_ui->themeComboBox->currentIndex())
-            .toInt());
+    //    QChart::ChartTheme theme = static_cast<QChart::ChartTheme>(
+    //        m_ui->themeComboBox->itemData(m_ui->themeComboBox->currentIndex())
+    //            .toInt());
+    QChart::ChartTheme theme = QChart::ChartThemeQt;
+
     //![6]
     const auto charts = m_charts;
     if (!m_charts.isEmpty() && m_charts.at(0)->chart()->theme() != theme) {
@@ -439,9 +443,10 @@ void ThemeWidget::updateUI() {
 
     // Update animation options
     //![9]
-    QChart::AnimationOptions options(
-        m_ui->animatedComboBox->itemData(m_ui->animatedComboBox->currentIndex())
-            .toInt());
+    //    QChart::AnimationOptions options(
+    //        m_ui->animatedComboBox->itemData(m_ui->animatedComboBox->currentIndex())
+    //            .toInt());
+    QChart::AnimationOptions options(QChart::AllAnimations);
     if (!m_charts.isEmpty() &&
         m_charts.at(0)->chart()->animationOptions() != options) {
         for (QChartView *chartView : charts)
@@ -451,9 +456,10 @@ void ThemeWidget::updateUI() {
 
     // Update legend alignment
     //![10]
-    Qt::Alignment alignment(
-        m_ui->legendComboBox->itemData(m_ui->legendComboBox->currentIndex())
-            .toInt());
+    //    Qt::Alignment alignment(
+    //        m_ui->legendComboBox->itemData(m_ui->legendComboBox->currentIndex())
+    //            .toInt());
+    Qt::Alignment alignment(0);
 
     if (!alignment) {
         for (QChartView *chartView : charts)
