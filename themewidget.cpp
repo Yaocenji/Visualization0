@@ -1,60 +1,4 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the Qt Charts module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:GPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 or (at your option) any later version
-** approved by the KDE Free Qt Foundation. The licenses are as published by
-** the Free Software Foundation and appearing in the file LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 #include "themewidget.h"
-
-#include <QtCharts/QAbstractBarSeries>
-#include <QtCharts/QAreaSeries>
-#include <QtCharts/QBarCategoryAxis>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLegend>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QPercentBarSeries>
-#include <QtCharts/QPieSeries>
-#include <QtCharts/QPieSlice>
-#include <QtCharts/QScatterSeries>
-#include <QtCharts/QSplineSeries>
-#include <QtCharts/QStackedBarSeries>
-#include <QtCharts/QValueAxis>
-#include <QtCore/QRandomGenerator>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QSpinBox>
-
-#include "ui_themewidget.h"
 
 ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     : QWidget(parent),
@@ -73,36 +17,43 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
 
     // create charts
 
+    barChart = new QChart();
+    pieChart = new QChart();
+    lineChart = new QChart();
+    splineChart = new QChart();
     scatterChart = new QChart();
+
+    barSeries = new QBarSeries();
+    pieSeries = new QPieSeries();
+    lineSeries = new QLineSeries();
+    splineSeries = new QSplineSeries();
     scatterSeries = new QScatterSeries();
 
-    //    chartView = new QChartView(createAreaChart());
-    //    m_ui->gridLayout->addWidget(chartView, 1, 0);
-    //    m_charts << chartView;
+//        chartView = new QChartView(createAreaChart());
+//        m_ui->gridLayout->addWidget(chartView, 1, 0);
+//        m_charts << chartView;
 
-    //    chartView = new QChartView(createPieChart());
-    //    // Funny things happen if the pie slice labels do not fit the screen,
-    //    so we ignore size policy
-    //    chartView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    //    m_ui->gridLayout->addWidget(chartView, 1, 1);
-    //    m_charts << chartView;
-
-    //![5]
-    //    chartView = new QChartView(createLineChart("length_votes", "rating"));
-    //    m_ui->gridLayout->addWidget(chartView, 1, 0);
-    //    //![5]
-    //    m_charts << chartView;
-
-    //    chartView = new QChartView(createBarChart(m_valueCount));
-    //    m_ui->gridLayout->addWidget(chartView, 2, 0);
-    //    m_charts << chartView;
-
-    //    chartView = new QChartView(createSplineChart());
-    //    m_ui->gridLayout->addWidget(chartView, 2, 1);
-    //    m_charts << chartView;
-
-    chartView = new QChartView(createScatterChart("length_votes", "rating"));
+    chartView = new QChartView(updatePieChart("languages"));
+    // Funny things happen if the pie slice labels do not fit the screen,
+    //so we ignore size policy
+    chartView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     m_ui->gridLayout->addWidget(chartView, 1, 0);
+    m_charts << chartView;
+
+    chartView = new QChartView(updateLineChart("length_votes", "rating"));
+    m_ui->gridLayout->addWidget(chartView, 1, 1);
+    m_charts << chartView;
+
+    chartView = new QChartView(updateBarChart("languages"));
+    m_ui->gridLayout->addWidget(chartView, 1, 2);
+    m_charts << chartView;
+
+    chartView = new QChartView(updateSplineChart("length_votes", "rating"));
+    m_ui->gridLayout->addWidget(chartView, 2, 0);
+    m_charts << chartView;
+
+    chartView = new QChartView(updateScatterChart("length_votes", "rating"));
+    m_ui->gridLayout->addWidget(chartView, 2, 1);
     m_charts << chartView;
 
     // Set defaults
@@ -125,6 +76,28 @@ ThemeWidget::~ThemeWidget() {
 //{
 
 //}
+
+bool cmpByLength_Minutes(galgame* a, galgame* b) {
+    return a->length_minutes > b->length_minutes;
+}
+bool cmpByLength_Votes(galgame* a, galgame* b) {
+    return a->length_votes > b->length_votes;
+}
+bool cmpByRating(galgame* a, galgame* b) {
+    return a->rating > b->rating;
+}
+bool cmpByVotecount(galgame* a, galgame* b) {
+    return a->votecount > b->votecount;
+}
+
+bool (*cmp(QString tag)) (galgame* a, galgame* b) {
+    if (tag == "length_minutes") return cmpByLength_Minutes;
+    if (tag == "length_votes") return cmpByLength_Votes;
+    if (tag == "rating") return cmpByRating;
+    if (tag == "votecount") return cmpByVotecount;
+    qDebug() << "cmp error";
+    return nullptr;
+}
 
 DataTable ThemeWidget::generateRandomData(int listCount, int valueMax,
                                           int valueCount) const {
@@ -179,183 +152,201 @@ void ThemeWidget::populateLegendBox() {
     m_ui->legendComboBox->addItem("Legend Right", Qt::AlignRight);
 }
 
-QChart *ThemeWidget::createAreaChart() const {
-    QChart *chart = new QChart();
-    chart->setTitle("Area chart");
+//QChart *ThemeWidget::createAreaChart() const {
+//    QChart *chart = new QChart();
+//    chart->setTitle("Area chart");
 
-    QLineSeries *lowerSeries = 0;
-    QString name("Series ");
-    int nameIndex = 0;
-    for (int i(0); i < m_dataTable.count(); i++) {
-        QLineSeries *upperSeries = new QLineSeries(chart);
-        for (int j(0); j < m_dataTable[i].count(); j++) {
-            Data data = m_dataTable[i].at(j);
-            if (lowerSeries) {
-                const QVector<QPointF> &points = lowerSeries->pointsVector();
-                upperSeries->append(QPointF(j, points[i].y() + data.first.y()));
-            } else {
-                upperSeries->append(QPointF(j, data.first.y()));
+//    QLineSeries *lowerSeries = 0;
+//    QString name("Series ");
+//    int nameIndex = 0;
+//    for (int i(0); i < m_dataTable.count(); i++) {
+//        QLineSeries *upperSeries = new QLineSeries(chart);
+//        for (int j(0); j < m_dataTable[i].count(); j++) {
+//            Data data = m_dataTable[i].at(j);
+//            if (lowerSeries) {
+//                const QVector<QPointF> &points = lowerSeries->pointsVector();
+//                upperSeries->append(QPointF(j, points[i].y() + data.first.y()));
+//            } else {
+//                upperSeries->append(QPointF(j, data.first.y()));
+//            }
+//        }
+//        QAreaSeries *area = new QAreaSeries(upperSeries, lowerSeries);
+//        area->setName(name + QString::number(nameIndex));
+//        nameIndex++;
+//        chart->addSeries(area);
+//        lowerSeries = upperSeries;
+//    }
+
+//    chart->createDefaultAxes();
+//    chart->axes(Qt::Horizontal).first()->setRange(0, m_valueCount - 1);
+//    chart->axes(Qt::Vertical).first()->setRange(0, m_valueMax);
+//    // Add space to label to add space between labels and axis
+//    QValueAxis *axisY =
+//        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+//    Q_ASSERT(axisY);
+//    axisY->setLabelFormat("%.1f  ");
+
+//    return chart;
+//}
+
+QChart* ThemeWidget::updateBarChart(QString tag) {
+    barChart->setTitle("Bar chart");
+    barSeries->clear();
+
+    double max = -1;
+
+    if (tag == "languages" || tag == "platforms") {
+        QMap<QString, int> dataMap;
+        int sum = m_galgames.count();
+        for (int i = 0; i < sum; i++) {
+            galgame *gal = m_galgames[i];
+            QVector<QString> dataVector = gal->getVector(tag);
+            for (int j = 0; j < dataVector.count(); j++) {
+                QString curTag = dataVector[j];
+                if (dataMap.contains(curTag)) dataMap.insert(curTag, dataMap[curTag] + 1);
+                else dataMap.insert(curTag, 1);
             }
         }
-        QAreaSeries *area = new QAreaSeries(upperSeries, lowerSeries);
-        area->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(area);
-        lowerSeries = upperSeries;
+
+        QMap<QString, int>::const_iterator it;
+
+        for (it = dataMap.constBegin(); it != dataMap.constEnd(); it++) {
+            QString key = it.key();
+            QBarSet *set = new QBarSet(key);
+            if (it.value() > max) max = it.value();
+            set->append(it.value());
+            set->setLabel(key);
+            barSeries->append(set);
+            barSeries->setLabelsVisible(true);
+        }
+    } else {
+        for (int i = 0; i < m_galgames.count(); i++) {
+            galgame *gal = m_galgames[i];
+            QBarSet *set = new QBarSet(gal->title);
+            if (gal->getDouble(tag) > max) max = gal->getDouble(tag);
+            set->append(gal->getDouble(tag));
+            barSeries->append(set);
+            barSeries->setLabelsVisible(true);
+        }
     }
 
-    chart->createDefaultAxes();
-    chart->axes(Qt::Horizontal).first()->setRange(0, m_valueCount - 1);
-    chart->axes(Qt::Vertical).first()->setRange(0, m_valueMax);
+
+    barChart->addSeries(barSeries);
+
+    barChart->createDefaultAxes();
+
+    barChart->axes(Qt::Vertical).first()->setRange(0, max);
     // Add space to label to add space between labels and axis
     QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
+        qobject_cast<QValueAxis *>(barChart->axes(Qt::Vertical).first());
     Q_ASSERT(axisY);
     axisY->setLabelFormat("%.1f  ");
 
-    return chart;
+    barChart->update();
+    return barChart;
 }
 
-QChart *ThemeWidget::createBarChart(int valueCount) const {
-    Q_UNUSED(valueCount);
-    QChart *chart = new QChart();
-    chart->setTitle("Bar chart");
-
-    QStackedBarSeries *series = new QStackedBarSeries(chart);
-    for (int i(0); i < m_dataTable.count(); i++) {
-        QBarSet *set = new QBarSet("Bar set " + QString::number(i));
-        for (const Data &data : m_dataTable[i]) *set << data.first.y();
-        series->append(set);
-    }
-    chart->addSeries(series);
-
-    chart->createDefaultAxes();
-    chart->axes(Qt::Vertical).first()->setRange(0, m_valueMax * 2);
-    // Add space to label to add space between labels and axis
-    QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
-    Q_ASSERT(axisY);
-    axisY->setLabelFormat("%.1f  ");
-
-    return chart;
-}
-
-QChart *ThemeWidget::createLineChart(QString tagX, QString tagY) const {
-    QChart *chart = new QChart();
-    chart->legend()->hide();
-    chart->setTitle("Line chart");
-
+QChart* ThemeWidget::updateLineChart(QString tagX, QString tagY)
+{
+    lineChart->setTitle("Line Chart");
+    lineSeries->clear();
     double maxX = -1;
     double maxY = -1;
-    QLineSeries *series = new QLineSeries(chart);
+    QList<QPointF> replaceData;
+    std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
     for (int i = 0; i < m_galgames.count(); i++) {
         galgame *gal = m_galgames[i];
-        if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
-        if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        series->append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
-        series->setName(gal->title);
-        series->setUseOpenGL(true);
+        if(gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+        if(gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
     }
-
-    chart->addSeries(series);
-
-    chart->createDefaultAxes();
-    //    chart->axes(Qt::Horizontal).first()->setRange(0, maxX);
-    //    chart->axes(Qt::Vertical).first()->setRange(0, maxY);
-
-    // Add space to label to add space between labels and axis
-    QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
-    Q_ASSERT(axisY);
-    axisY->setLabelFormat("%.0f  ");
-
-    return chart;
+    lineChart->addSeries(lineSeries);
+    lineChart->createDefaultAxes();
+    lineChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    lineChart->axes(Qt::Vertical).first()->setRange(0, maxY);
+    lineSeries->replace(replaceData);
+    lineChart->update();
+    return lineChart;
 }
 
-QChart *ThemeWidget::createPieChart() const {
-    QChart *chart = new QChart();
-    chart->setTitle("Pie chart");
+QChart* ThemeWidget::updatePieChart(QString tag) {
+    pieChart->setTitle("Pie Chart");
+    pieSeries->clear();
+    QMap<QString, int> replaceData;
 
-    QPieSeries *series = new QPieSeries(chart);
-    for (const Data &data : m_dataTable[0]) {
-        QPieSlice *slice = series->append(data.second, data.first.y());
-        if (data == m_dataTable[0].first()) {
-            // Show the first slice exploded with label
+    int sum = m_galgames.count();
+    for (int i = 0; i < sum; i++) {
+        galgame *gal = m_galgames[i];
+        QVector<QString> dataVector = gal->getVector(tag);
+        for (int j = 0; j < dataVector.count(); j++) {
+            QString curTag = dataVector[j];
+            if (replaceData.contains(curTag)) replaceData.insert(curTag, replaceData[curTag] + 1);
+            else replaceData.insert(curTag, 1);
+        }
+    }
+
+    QMap<QString, int>::const_iterator it;
+
+    for (it = replaceData.constBegin(); it != replaceData.constEnd(); it++) {
+        QString key = it.key();
+        QPieSlice *slice = pieSeries->append(key, it.value());
+        if (it == replaceData.constBegin()) {
             slice->setLabelVisible();
             slice->setExploded();
             slice->setExplodeDistanceFactor(0.5);
         }
     }
-    series->setPieSize(0.4);
-    chart->addSeries(series);
 
-    return chart;
+    pieChart->addSeries(pieSeries);
+
+    pieSeries->setPieSize(0.4);
+
+    pieChart->update();
+    return pieChart;
 }
 
-QChart *ThemeWidget::createSplineChart() const {
-    QChart *chart = new QChart();
-    chart->setTitle("Spline chart");
-    QString name("Series ");
-    int nameIndex = 0;
-    for (const DataList &list : m_dataTable) {
-        QSplineSeries *series = new QSplineSeries(chart);
-        for (const Data &data : list) series->append(data.first);
-        series->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(series);
-    }
-
-    chart->createDefaultAxes();
-    chart->axes(Qt::Horizontal).first()->setRange(0, m_valueMax);
-    chart->axes(Qt::Vertical).first()->setRange(0, m_valueCount);
-
-    // Add space to label to add space between labels and axis
-    QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first());
-    Q_ASSERT(axisY);
-    axisY->setLabelFormat("%.1f  ");
-    return chart;
-}
-
-QChart *ThemeWidget::createScatterChart(QString tagX, QString tagY) const {
-    // scatter chart
-    scatterChart->setTitle("Scatter chart");
-
+QChart* ThemeWidget::updateSplineChart(QString tagX, QString tagY) {
+    splineChart->setTitle("Spline Chart");
+    splineSeries->clear();
     double maxX = -1;
     double maxY = -1;
-
+    QList<QPointF> replaceData;
+    std::sort(m_galgames.begin(), m_galgames.end(), cmp(tagX));
     for (int i = 0; i < m_galgames.count(); i++) {
         galgame *gal = m_galgames[i];
-        if (gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
-        if (gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
-        scatterSeries->append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
+        if(gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+        if(gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
+        replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
     }
-    scatterChart->legend()->hide();
-    scatterChart->addSeries(scatterSeries);
-
-    scatterChart->createDefaultAxes();
-    scatterChart->axes(Qt::Horizontal).first()->setRange(0, 150);
-        scatterChart->axes(Qt::Vertical).first()->setRange(0, 100);
-
-    // Add space to label to add space between labels and axis
-    QValueAxis *axisY =
-        qobject_cast<QValueAxis *>(scatterChart->axes(Qt::Vertical).first());
-    Q_ASSERT(axisY);
-    axisY->setLabelFormat("%.1f  ");
-    return scatterChart;
+    splineChart->addSeries(splineSeries);
+    splineChart->createDefaultAxes();
+    splineChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    splineChart->axes(Qt::Vertical).first()->setRange(0, maxY);
+    splineSeries->replace(replaceData);
+    splineChart->update();
+    return splineChart;
 }
 
-void ThemeWidget::updateScatterChart(QString tagX, QString tagY) const {
+QChart* ThemeWidget::updateScatterChart(QString tagX, QString tagY) {
+    scatterChart->setTitle("Scatter Chart");
     scatterSeries->clear();
+    double maxX = -1;
+    double maxY = -1;
     QList<QPointF> replaceData;
     for (int i = 0; i < m_galgames.count(); i++) {
         galgame *gal = m_galgames[i];
+        if(gal->getDouble(tagX) > maxX) maxX = gal->getDouble(tagX);
+        if(gal->getDouble(tagY) > maxY) maxY = gal->getDouble(tagY);
         replaceData.append(QPointF(gal->getDouble(tagX), gal->getDouble(tagY)));
     }
+    scatterChart->addSeries(scatterSeries);
+    scatterChart->createDefaultAxes();
+    scatterChart->axes(Qt::Horizontal).first()->setRange(0, maxX);
+    scatterChart->axes(Qt::Vertical).first()->setRange(0, maxY);
     qDebug() << replaceData;
     scatterSeries->replace(replaceData);
     scatterChart->update();
-    chartView->update();
+    return scatterChart;
 }
 
 void ThemeWidget::updateUI() {
@@ -458,4 +449,8 @@ void ThemeWidget::addJsonData(QJsonObject *addData) {
         m_galgames.append(gal);
     }
     updateScatterChart("length_votes", "rating");
+    updateLineChart("length_votes", "rating");
+    updateSplineChart("length_votes", "rating");
+    updatePieChart("languages");
+    updateBarChart("rating");
 }

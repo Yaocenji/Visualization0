@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     m->sendRequest("vn", {{"tag", "=", "g23"}, {"tag", "=", "g45"}},
                    {"title", "languages", "platforms", "length_minutes",
                     "length_votes", "rating", "votecount"},
-                   "rating", true, 50, 1);
+                   "rating", true, 7, 1);
 
     //qDebug() << "OpenSSL支持情况:" << QSslSocket::supportsSsl();
     return a.exec();

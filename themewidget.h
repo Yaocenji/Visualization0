@@ -1,32 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the Qt Charts module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:GPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 or (at your option) any later version
-** approved by the KDE Free Qt Foundation. The licenses are as published by
-** the Free Software Foundation and appearing in the file LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 #ifndef THEMEWIDGET_H
 #define THEMEWIDGET_H
 
@@ -83,7 +54,12 @@ class ThemeWidget : public QWidget {
     Q_OBJECT
 public:
     explicit ThemeWidget(QJsonObject jsonObject, QWidget *parent = 0);
-    void updateScatterChart(QString tagX, QString tagY) const;
+    void sortByTag(QString tag, QVector<galgame*> &galgames);
+    QChart* updateBarChart(QString tag);
+    QChart* updatePieChart(QString tag);
+    QChart* updateLineChart(QString tagX, QString tagY);
+    QChart* updateSplineChart(QString tagX, QString tagY);
+    QChart* updateScatterChart(QString tagX, QString tagY);
     ~ThemeWidget();
 
 private Q_SLOTS:
@@ -97,12 +73,12 @@ private:
     void populateAnimationBox();
     void populateLegendBox();
     void connectSignals();
-    QChart *createAreaChart() const;
-    QChart *createBarChart(int valueCount) const;
-    QChart *createPieChart() const;
-    QChart *createLineChart(QString tagX, QString tagY) const;
-    QChart *createSplineChart() const;
-    QChart *createScatterChart(QString tagX, QString tagY) const;
+//    QChart *createAreaChart() const;
+//    QChart *createBarChart(QString tag) const;
+//    QChart *createPieChart(QString tag) const;
+//    QChart *createLineChart(QString tagX, QString tagY) const;
+//    QChart *createSplineChart(QString tagX, QString tagY) const;
+//    QChart *createScatterChart(QString tagX, QString tagY) const;
 
 public slots:
     // 添加json数据
@@ -117,8 +93,19 @@ private:
     QVector<galgame *> m_galgames;
 
     QChartView *chartView;
+
+    QBarSeries* barSeries;
+    QPieSeries* pieSeries;
+    QLineSeries* lineSeries;
+    QSplineSeries* splineSeries;
     QScatterSeries* scatterSeries;
+
+    QChart *barChart;
+    QChart *pieChart;
+    QChart *lineChart;
+    QChart *splineChart;
     QChart *scatterChart;
+
     Ui_ThemeWidgetForm *m_ui;
 };
 

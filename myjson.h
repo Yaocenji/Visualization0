@@ -28,6 +28,13 @@ public:
         qDebug() << "getDouble type error";
         return -1;
     }
+
+    QVector<QString> getVector(QString tag) {
+        if (tag == "languages") return languages;
+        if (tag == "platforms") return platforms;
+        qDebug() << "getVector type error";
+        return QVector<QString>();
+    }
 };
 
 class myjson {
