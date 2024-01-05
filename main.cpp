@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     m->sendRequest("vn", {},
                    {"title", "languages", "platforms", "length_minutes",
                     "length_votes", "rating", "votecount"},
-                   "rating", true, 100, 1);
+                   "rating", true, 10, 1);
 
     return a.exec();
 }

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Schema">
+        <file>enum.json</file>
+    </qresource>
+</RCC>

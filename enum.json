@@ -1,0 +1,467 @@
+{
+    "filterItem":[
+        {
+            "search": "search",
+            "language": "lang",
+            "platform": "platform"
+        }
+    ],
+    "platform": [
+        {
+            "id": "win",
+            "label": "Windows"
+        },
+        {
+            "id": "lin",
+            "label": "Linux"
+        },
+        {
+            "label": "Mac OS",
+            "id": "mac"
+        },
+        {
+            "id": "web",
+            "label": "Website"
+        },
+        {
+            "id": "tdo",
+            "label": "3DO"
+        },
+        {
+            "id": "ios",
+            "label": "Apple iProduct"
+        },
+        {
+            "label": "Android",
+            "id": "and"
+        },
+        {
+            "label": "Blu-ray Player",
+            "id": "bdp"
+        },
+        {
+            "id": "dos",
+            "label": "DOS"
+        },
+        {
+            "id": "dvd",
+            "label": "DVD Player"
+        },
+        {
+            "id": "drc",
+            "label": "Dreamcast"
+        },
+        {
+            "label": "Famicom",
+            "id": "nes"
+        },
+        {
+            "id": "sfc",
+            "label": "Super Famicom"
+        },
+        {
+            "id": "fm7",
+            "label": "FM-7"
+        },
+        {
+            "id": "fm8",
+            "label": "FM-8"
+        },
+        {
+            "label": "FM Towns",
+            "id": "fmt"
+        },
+        {
+            "label": "Game Boy Advance",
+            "id": "gba"
+        },
+        {
+            "label": "Game Boy Color",
+            "id": "gbc"
+        },
+        {
+            "label": "MSX",
+            "id": "msx"
+        },
+        {
+            "label": "Nintendo DS",
+            "id": "nds"
+        },
+        {
+            "label": "Nintendo Switch",
+            "id": "swi"
+        },
+        {
+            "id": "wii",
+            "label": "Nintendo Wii"
+        },
+        {
+            "label": "Nintendo Wii U",
+            "id": "wiu"
+        },
+        {
+            "label": "Nintendo 3DS",
+            "id": "n3d"
+        },
+        {
+            "id": "p88",
+            "label": "PC-88"
+        },
+        {
+            "label": "PC-98",
+            "id": "p98"
+        },
+        {
+            "id": "pce",
+            "label": "PC Engine"
+        },
+        {
+            "label": "PC-FX",
+            "id": "pcf"
+        },
+        {
+            "label": "PlayStation Portable",
+            "id": "psp"
+        },
+        {
+            "label": "PlayStation 1",
+            "id": "ps1"
+        },
+        {
+            "label": "PlayStation 2",
+            "id": "ps2"
+        },
+        {
+            "label": "PlayStation 3",
+            "id": "ps3"
+        },
+        {
+            "id": "ps4",
+            "label": "PlayStation 4"
+        },
+        {
+            "label": "PlayStation 5",
+            "id": "ps5"
+        },
+        {
+            "id": "psv",
+            "label": "PlayStation Vita"
+        },
+        {
+            "id": "smd",
+            "label": "Sega Mega Drive"
+        },
+        {
+            "label": "Sega Mega-CD",
+            "id": "scd"
+        },
+        {
+            "id": "sat",
+            "label": "Sega Saturn"
+        },
+        {
+            "label": "VNDS",
+            "id": "vnd"
+        },
+        {
+            "id": "x1s",
+            "label": "Sharp X1"
+        },
+        {
+            "id": "x68",
+            "label": "Sharp X68000"
+        },
+        {
+            "label": "Xbox",
+            "id": "xb1"
+        },
+        {
+            "label": "Xbox 360",
+            "id": "xb3"
+        },
+        {
+            "id": "xbo",
+            "label": "Xbox One"
+        },
+        {
+            "label": "Xbox X/S",
+            "id": "xxs"
+        },
+        {
+            "id": "mob",
+            "label": "Other (mobile)"
+        },
+        {
+            "label": "Other",
+            "id": "oth"
+        }
+    ],
+    "language": [
+        {
+            "id": "ar",
+            "label": "Arabic"
+        },
+        {
+            "id": "eu",
+            "label": "Basque"
+        },
+        {
+            "label": "Bulgarian",
+            "id": "bg"
+        },
+        {
+            "id": "ca",
+            "label": "Catalan"
+        },
+        {
+            "id": "ck",
+            "label": "Cherokee"
+        },
+        {
+            "label": "Chinese",
+            "id": "zh"
+        },
+        {
+            "id": "zh-Hans",
+            "label": "Chinese (simplified)"
+        },
+        {
+            "id": "zh-Hant",
+            "label": "Chinese (traditional)"
+        },
+        {
+            "label": "Croatian",
+            "id": "hr"
+        },
+        {
+            "label": "Czech",
+            "id": "cs"
+        },
+        {
+            "id": "da",
+            "label": "Danish"
+        },
+        {
+            "id": "nl",
+            "label": "Dutch"
+        },
+        {
+            "id": "en",
+            "label": "English"
+        },
+        {
+            "id": "eo",
+            "label": "Esperanto"
+        },
+        {
+            "label": "Finnish",
+            "id": "fi"
+        },
+        {
+            "label": "French",
+            "id": "fr"
+        },
+        {
+            "id": "de",
+            "label": "German"
+        },
+        {
+            "label": "Greek",
+            "id": "el"
+        },
+        {
+            "label": "Hebrew",
+            "id": "he"
+        },
+        {
+            "label": "Hindi",
+            "id": "hi"
+        },
+        {
+            "label": "Hungarian",
+            "id": "hu"
+        },
+        {
+            "label": "Irish",
+            "id": "ga"
+        },
+        {
+            "id": "id",
+            "label": "Indonesian"
+        },
+        {
+            "label": "Italian",
+            "id": "it"
+        },
+        {
+            "label": "Inuktitut",
+            "id": "iu"
+        },
+        {
+            "label": "Japanese",
+            "id": "ja"
+        },
+        {
+            "label": "Korean",
+            "id": "ko"
+        },
+        {
+            "id": "la",
+            "label": "Latin"
+        },
+        {
+            "id": "lv",
+            "label": "Latvian"
+        },
+        {
+            "id": "lt",
+            "label": "Lithuanian"
+        },
+        {
+            "id": "mk",
+            "label": "Macedonian"
+        },
+        {
+            "id": "ms",
+            "label": "Malay"
+        },
+        {
+            "label": "Norwegian",
+            "id": "no"
+        },
+        {
+            "id": "fa",
+            "label": "Persian"
+        },
+        {
+            "id": "pl",
+            "label": "Polish"
+        },
+        {
+            "id": "pt-br",
+            "label": "Portuguese (Brazil)"
+        },
+        {
+            "label": "Portuguese (Portugal)",
+            "id": "pt-pt"
+        },
+        {
+            "id": "ro",
+            "label": "Romanian"
+        },
+        {
+            "label": "Russian",
+            "id": "ru"
+        },
+        {
+            "label": "Scottish Gaelic",
+            "id": "gd"
+        },
+        {
+            "id": "sr",
+            "label": "Serbian"
+        },
+        {
+            "id": "sk",
+            "label": "Slovak"
+        },
+        {
+            "label": "Slovene",
+            "id": "sl"
+        },
+        {
+            "id": "es",
+            "label": "Spanish"
+        },
+        {
+            "label": "Swedish",
+            "id": "sv"
+        },
+        {
+            "label": "Tagalog",
+            "id": "ta"
+        },
+        {
+            "label": "Thai",
+            "id": "th"
+        },
+        {
+            "label": "Turkish",
+            "id": "tr"
+        },
+        {
+            "id": "uk",
+            "label": "Ukrainian"
+        },
+        {
+            "label": "Urdu",
+            "id": "ur"
+        },
+        {
+            "id": "vi",
+            "label": "Vietnamese"
+        }
+    ],
+    "medium": [
+        {
+            "label": "CD",
+            "id": "cd",
+            "plural": "CDs"
+        },
+        {
+            "label": "DVD",
+            "id": "dvd",
+            "plural": "DVDs"
+        },
+        {
+            "id": "gdr",
+            "label": "GD-ROM",
+            "plural": "GD-ROMs"
+        },
+        {
+            "plural": "Blu-ray discs",
+            "id": "blr",
+            "label": "Blu-ray disc"
+        },
+        {
+            "label": "Floppy",
+            "id": "flp",
+            "plural": "Floppies"
+        },
+        {
+            "label": "Cassette tape",
+            "id": "cas",
+            "plural": "Cassette tapes"
+        },
+        {
+            "id": "mrt",
+            "label": "Cartridge",
+            "plural": "Cartridges"
+        },
+        {
+            "plural": "Memory cards",
+            "id": "mem",
+            "label": "Memory card"
+        },
+        {
+            "label": "UMD",
+            "id": "umd",
+            "plural": "UMDs"
+        },
+        {
+            "id": "nod",
+            "label": "Nintendo Optical Disc",
+            "plural": "Nintendo Optical Discs"
+        },
+        {
+            "plural": null,
+            "id": "in",
+            "label": "Internet download"
+        },
+        {
+            "label": "Other",
+            "id": "otc",
+            "plural": null
+        }
+    ]
+}
