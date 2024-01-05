@@ -59,9 +59,9 @@ ThemeWidget::ThemeWidget(QJsonObject jsonObject, QWidget *parent)
     connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChartComboBox()));
     updateChartComboBox();
 
-    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
-    connect(m_ui->tagX, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
-    connect(m_ui->tagY, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChart()));
+    connect(m_ui->chartType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
+    connect(m_ui->tagX, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
+    connect(m_ui->tagY, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFetchButton()));
 
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
@@ -131,6 +131,10 @@ bool (*cmp(QString tag))(galgame *a, galgame *b) {
     if (tag == "votecount") return cmpByVotecount;
     qDebug() << "cmp error";
     return nullptr;
+}
+
+void ThemeWidget::updateFetchButton() {
+    m_ui->filterApplyPushButton->setText(QString("[配置已更改]应用并抓取数据"));
 }
 
 void ThemeWidget::updateChartComboBox() {

@@ -95,7 +95,7 @@ public slots:
     // 应用
     void ApplyFilter();
 
-
+    void updateFetchButton();
     void updateChartComboBox();
     void updateChart();
 
@@ -124,8 +124,6 @@ private:
     QChart *lineChart;
     QChart *splineChart;
     QChart *scatterChart;
-
-    QMap<QString, QVector<QString> > chartMap;
 
     QMap<QString, QVector<QString> > chartMap;
 
